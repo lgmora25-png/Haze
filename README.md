@@ -10,9 +10,9 @@ Su misión es ofrecer un **espacio amigable, intuitivo y eficiente** donde los u
 ## Funcionalidades Clave
 
 La aplicación está diseñada para ser ágil, robusta y con altos estándares de calidad (ISO 25010):
-* **Acceso como visitante (HU-1):** Explora e interactúa con el catálogo completo de juegos dinámicamente sin necesidad de un inicio de sesión previo.
-* **Registro de cuenta y autenticación (HU-3):** Creación de perfiles para la comunidad ucabista con resguardo seguro de credenciales.
-* **Gestión Administrativa (HU-2):** Panel exclusivo para el rol de Dueño que permite registrar nuevos títulos, controlando de forma estricta la robustez frente a errores de datos.
+* **Acceso como visitante: ** Explora e interactúa con el catálogo completo de juegos dinámicamente sin necesidad de un inicio de sesión previo.
+* **Registro de cuenta y autenticación:** Creación de perfiles para la comunidad ucabista con resguardo seguro de credenciales.
+* **Gestión Administrativa:** Panel exclusivo para el rol de Dueño que permite registrar nuevos títulos, controlando de forma estricta la robustez frente a errores de datos.
 
 Nuestra prioridad en este primer release es garantizar un software **estable, seguro y con tiempos de carga inferiores a 1.5 segundos**, sentando las bases para futuras expansiones del catálogo y simulación de transacciones.
 
@@ -23,14 +23,14 @@ Nuestra prioridad en este primer release es garantizar un software **estable, se
 HAZE sigue una arquitectura **Cliente-Servidor (Frontend/Backend)**, empleando herramientas estandarizadas y escalables:
 
 ### Frontend
-* **HTML5, CSS3 & JavaScript** → Construcción de interfaces dinámicas, estéticas y reactivas optimizadas para navegadores modernos (Google Chrome, Mozilla Firefox y Safari).
+* **HTML5, CSS & JavaScript** → Construcción de interfaces dinámicas, estéticas y reactivas optimizadas para navegadores modernos (Google Chrome, Mozilla Firefox y Safari).
 
 ### Backend
-* **Node.js / Expres (o tu tecnología de Backend)** → Entorno de ejecución y framework robusto para la lógica del servidor, gestión de roles y APIs RESTful.
+* 
 
 ### Gestión y Persistencia
 * **Git & GitHub** → Control de versiones y colaboración del equipo de desarrollo.
-* **JSON / Base de Datos** → Formato estándar e intercambio de datos seguro para persistir los registros de juegos y usuarios de la comunidad.
+* **/ Base de Datos** → Formato estándar e intercambio de datos seguro para persistir los registros de juegos y usuarios de la comunidad.
 
 ---
 
