@@ -18,6 +18,7 @@ src/fronted/
 ├── index.html
 ├── package.json
 └── vite.config.js
+```
 📂 Desglose de Componentes y Archivos
 views/juegos/
 Propósito: Representan las pantallas e historias de usuario específicas con las que interactúa el cliente en el ecosistema de videojuegos.
