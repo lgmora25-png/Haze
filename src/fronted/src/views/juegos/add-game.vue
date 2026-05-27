@@ -1,17 +1,16 @@
 <script setup>
 import { ref } from 'vue'
 
-// Avisamos a App.vue que este componente puede enviar el evento para volver
 defineEmits(['volver'])
 
-// Variables reactivas para capturar los datos del formulario
+
 const titulo = ref('')
 const categoria = ref('')
 const precio = ref(0)
 const imagen = ref('')
 const disponible = ref(true)
 
-// Función para manejar el envío del formulario
+
 const guardarJuego = () => {
   // Aquí armamos el objeto con la información limpia
   const nuevoJuego = {

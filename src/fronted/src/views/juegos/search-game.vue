@@ -1,10 +1,10 @@
 <script setup>
 import { ref, computed } from 'vue'
 
-// Avisamos a App.vue que este componente puede enviar el evento 'ver-detalle'
+
 defineEmits(['ver-detalle'])
 
-// Base de datos simulada de tus juegos
+
 const juegos = ref([
   {
     id: 1,
@@ -32,16 +32,15 @@ const juegos = ref([
   }
 ])
 
-// Variables reactivas para el buscador
 const textoBusqueda = ref('')
 const filtroAplicado = ref('')
 
-// Ejecuta el filtro cuando el usuario le da al botón o presiona Enter
+
 const buscar = () => {
   filtroAplicado.value = textoBusqueda.value
 }
 
-// Filtra la lista en tiempo real basado en el botón
+
 const juegosFiltrados = computed(() => {
   if (!filtroAplicado.value.trim()) {
     return juegos.value

@@ -105,7 +105,7 @@ const juegosFiltrados = computed(() => {
 </template>
 
 <style scoped>
-/* Estilos itch.io limpios */
+
 .itch-catalog {
   max-width: 1100px;
   margin: 0 auto;
