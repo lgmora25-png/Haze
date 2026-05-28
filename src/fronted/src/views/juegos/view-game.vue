@@ -1,47 +1,52 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 // Avisamos a App.vue que este componente puede enviar el evento 'ver-detalle'
 defineEmits(['ver-detalle'])
 
-// Base de datos simulada de tus juegos
-const juegos = ref([
-  {
-    id: 1,
-    titulo: 'Project Zomboid',
-    categoria: 'Survival RPG',
-    precio: 19.99,
-    imagen: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80', 
-    disponible: true
-  },
-  {
-    id: 2,
-    titulo: "Don't Starve Together",
-    categoria: 'Indie Survival',
-    precio: 14.99,
-    imagen: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=400&q=80',
-    disponible: true
-  },
-  {
-    id: 3,
-    titulo: 'Minecraft',
-    categoria: 'Sandbox Adventure',
-    precio: 29.99,
-    imagen: 'https://images.unsplash.com/photo-1605899435973-ca2d1a8861cf?auto=format&fit=crop&w=400&q=80',
-    disponible: false
-  }
-])
+// 1. El estado ahora inicia vacío porque los datos vendrán del backend real
+const juegos = ref([])
+const cargando = ref(true)
+const errorMensaje = ref(null)
 
 // Variables reactivas para el buscador
 const textoBusqueda = ref('')
 const filtroAplicado = ref('')
+
+// 2. Función encargada de consumir tu nueva API Express local
+const cargarCatalogo = async () => {
+  try {
+    cargando.value = true
+    errorMensaje.value = null
+    
+    // Apuntamos al puerto 3000 de tu servidor Express
+    const respuesta = await fetch('http://localhost:3000/api/juegos')
+    
+    if (!respuesta.ok) {
+      throw new Error('Hubo un problema al conectar con el servidor de HAZE.')
+    }
+    
+    // Guardamos los datos que nos entregó el JuegoController
+    juegos.value = await respuesta.json()
+  } catch (error) {
+    errorMensaje.value = error.message
+    console.error('Error al cargar juegos:', error)
+  } finally {
+    cargando.value = false
+  }
+}
+
+// 3. Hook para disparar la carga automáticamente cuando el usuario entre a la página
+onMounted(() => {
+  cargarCatalogo()
+})
 
 // Ejecuta el filtro cuando el usuario le da al botón o presiona Enter
 const buscar = () => {
   filtroAplicado.value = textoBusqueda.value
 }
 
-// Filtra la lista en tiempo real basado en el botón
+// Filtra la lista en tiempo real basado en lo que regrese el backend
 const juegosFiltrados = computed(() => {
   if (!filtroAplicado.value.trim()) {
     return juegos.value
@@ -74,7 +79,15 @@ const juegosFiltrados = computed(() => {
       <p v-else>Latest titles on HAZE</p>
     </header>
 
-    <div v-if="juegosFiltrados.length === 0" class="no-results">
+    <div v-if="cargando" class="no-results">
+      ⏳ Cargando el catálogo de HAZE desde el servidor...
+    </div>
+
+    <div v-else-if="errorMensaje" class="no-results" style="color: #da5b5b; border-color: #da5b5b;">
+      ⚠️ Error: {{ errorMensaje }}. Asegúrate de encender el backend.
+    </div>
+
+    <div v-else-if="juegosFiltrados.length === 0" class="no-results">
       No se encontraron videojuegos que coincidan con tu búsqueda.
     </div>
 
@@ -87,15 +100,17 @@ const juegosFiltrados = computed(() => {
         @click="$emit('ver-detalle', juego)"
       >
         <div class="itch-card-image">
-          <img :src="juego.imagen" :alt="juego.titulo">
+          <img :src="juego.imagen_url" :alt="juego.titulo">
         </div>
         
         <div class="itch-card-content">
           <h2 class="itch-title">{{ juego.titulo }}</h2>
-          <p class="itch-category">{{ juego.categoria }}</p>
+          <p class="itch-category">{{ juego.generos || 'Sin categoría' }}</p>
           
           <div class="itch-footer">
-            <span class="itch-price">${{ juego.precio.toFixed(2) }}</span>
+            <span class="itch-price">
+              {{ juego.precio === 0 ? 'Gratis' : `$${Number(juego.precio).toFixed(2)}` }}
+            </span>
             <span v-if="!juego.disponible" class="itch-badge">In development</span>
           </div>
         </div>
@@ -103,7 +118,6 @@ const juegosFiltrados = computed(() => {
     </main>
   </div>
 </template>
-
 <style scoped>
 
 .itch-catalog {

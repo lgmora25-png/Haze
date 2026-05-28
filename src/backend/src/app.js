@@ -1,27 +1,16 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import juegoRoutes from './routes/juegoRoutes.js';
+import express from 'express'
+import cors from 'cors' // <-- Asegúrate de que esté aquí
+import juegoRoutes from './routes/juegoRoutes.js'
 
-// Cargar variables de entorno
-dotenv.config();
+const app = express()
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+// IMPORTANTE: cors() DEBE ir antes de las rutas
+app.use(cors()) 
+app.use(express.json())
 
-// Middlewares globales de calidad y seguridad
-app.use(cors());          // Permite peticiones desde el frontend (Vue)
-app.use(express.json());  // Permite al servidor entender formatos JSON en el body
+app.use('/api/juegos', juegoRoutes)
 
-// Enrutador Principal de la API
-app.use('/api/juegos', juegoRoutes);
-
-// Ruta de prueba rápida por si abres el puerto en el navegador
-app.get('/', (req, res) => {
-  res.send('🎮 Servidor de HAZE API corriendo perfectamente.');
-});
-
-// Levantar el servidor
+const PORT = 3000
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor backend encendido en: http://localhost:${PORT}`);
-});
+  console.log(`🚀 Servidor backend encendido en: http://localhost:3000`)
+})

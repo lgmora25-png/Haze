@@ -1,67 +1,43 @@
 <script setup>
-import { ref } from 'vue'
-import SearchGame from './juegos/search-game.vue'
-import AddGame from './juegos/add-game.vue'
-import ViewGame from './juegos/view-game.vue'
-
-const pantallaActual = ref('search')
-
-
-const juegoSeleccionado = ref(null)
-
-const irAPantalla = (pantalla, datosJuego = null) => {
-  pantallaActual.value = pantalla
-  if (datosJuego) {
-    juegoSeleccionado.value = datosJuego
-  }
-}
+// Tu archivo router/index.js se encarga de cargarlos dinámicamente.
 </script>
 
 <template>
   <div class="haze-app-container">
     
     <nav class="navbar-global">
-      <div class="nav-logo" @click="irAPantalla('search')">HAZE 👾</div>
+      <div class="nav-links-left">
+        <router-link to="/" class="nav-logo">HAZE 👾</router-link>
+      </div>
+      
       <div class="nav-links">
-        <button 
-          class="nav-btn" 
-          :class="{ active: pantallaActual === 'search' }"
-          @click="irAPantalla('search')"
+        <router-link 
+          to="/" 
+          class="nav-btn"
+          active-class="active"
         >
           Ver Catálogo
-        </button>
-        <button 
-          class="nav-btn btn-accent" 
-          @click="irAPantalla('add')"
+        </router-link>
+        
+        <router-link 
+          to="/subir-juego" 
+          class="nav-btn btn-accent"
+          active-class="active"
         >
           ➕ Subir Juego
-        </button>
+        </router-link>
       </div>
     </nav>
 
     <main class="main-content">
-      <SearchGame 
-        v-if="pantallaActual === 'search'" 
-        @ver-detalle="(juego) => irAPantalla('view', juego)" 
-      />
-
-      <AddGame 
-        v-if="pantallaActual === 'add'" 
-        @volver="irAPantalla('search')" 
-      />
-
-      <ViewGame 
-        v-if="pantallaActual === 'view'" 
-        :juego="juegoSeleccionado"
-        @volver="irAPantalla('search')" 
-      />
+      <router-view />
     </main>
 
   </div>
 </template>
 
 <style>
-
+/* Mantenemos tus estilos globales y paleta de colores original */
 body {
   margin: 0;
   background-color: #1c1c1c;
@@ -84,6 +60,7 @@ body {
   color: #fff;
   cursor: pointer;
   letter-spacing: 1px;
+  text-decoration: none;
 }
 
 .nav-links {
@@ -101,12 +78,17 @@ body {
   padding: 6px 12px;
   border-radius: 4px;
   transition: color 0.15s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
 }
 
+/* El estado hover y la clase active que Vue Router controla por sí solo */
 .nav-btn:hover, .nav-btn.active {
   color: #fff;
 }
 
+/* Tu característico botón de acento rojo para HAZE */
 .nav-btn.btn-accent {
   background-color: #da5b5b;
   color: white;
@@ -114,6 +96,11 @@ body {
 
 .nav-btn.btn-accent:hover {
   background-color: #c44a4a;
+}
+
+/* El botón rojo se oscurece un poco al estar activo para que resalte correctamente */
+.nav-btn.btn-accent.active {
+  background-color: #a83b3b;
 }
 
 .main-content {

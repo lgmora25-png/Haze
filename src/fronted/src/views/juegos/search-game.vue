@@ -1,45 +1,43 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 
-defineEmits(['ver-detalle'])
-
-
-const juegos = ref([
-  {
-    id: 1,
-    titulo: 'Project Zomboid',
-    categoria: 'Survival RPG',
-    precio: 19.99,
-    imagen: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80', 
-    disponible: true
-  },
-  {
-    id: 2,
-    titulo: "Don't Starve Together",
-    categoria: 'Indie Survival',
-    precio: 14.99,
-    imagen: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=400&q=80',
-    disponible: true
-  },
-  {
-    id: 3,
-    titulo: 'Minecraft',
-    categoria: 'Sandbox Adventure',
-    precio: 29.99,
-    imagen: 'https://images.unsplash.com/photo-1605899435973-ca2d1a8861cf?auto=format&fit=crop&w=400&q=80',
-    disponible: false
-  }
-])
+const juegos = ref([])
+const cargando = ref(true)
+const errorMensaje = ref(null)
 
 const textoBusqueda = ref('')
 const filtroAplicado = ref('')
 
+onMounted(async () => {
+  try {
+    cargando.value = true
+    errorMensaje.value = null
+    
+    // Cambiamos 'localhost' por la IP directa '127.0.0.1' para romper el ERR_CONNECTION_REFUSED
+    const respuesta = await fetch('http://127.0.0.1:3000/api/juegos')
+    
+    if (!respuesta.ok) {
+      throw new Error(`Error en el servidor backend (Código: ${respuesta.status}).`)
+    }
+    
+    juegos.value = await respuesta.json()
+  } catch (error) {
+    // Si la conexión vuelve a rebotar por completo, dará un mensaje más claro
+    errorMensaje.value = error.message === 'Failed to fetch' 
+      ? 'No se pudo conectar con el servidor de HAZE. Asegúrate de que el backend esté encendido.' 
+      : error.message
+    console.error(error)
+  } finally {
+    cargando.value = false
+  }
+})
 
 const buscar = () => {
   filtroAplicado.value = textoBusqueda.value
 }
-
 
 const juegosFiltrados = computed(() => {
   if (!filtroAplicado.value.trim()) {
@@ -73,7 +71,15 @@ const juegosFiltrados = computed(() => {
       <p v-else>Latest titles on HAZE</p>
     </header>
 
-    <div v-if="juegosFiltrados.length === 0" class="no-results">
+    <div v-if="cargando" class="no-results">
+      ⏳ Cargando el catálogo de HAZE...
+    </div>
+
+    <div v-else-if="errorMensaje" class="no-results" style="color: #da5b5b; border-color: #da5b5b;">
+      ⚠️ Error: {{ errorMensaje }}
+    </div>
+
+    <div v-else-if="juegosFiltrados.length === 0" class="no-results">
       No se encontraron videojuegos que coincidan con tu búsqueda.
     </div>
 
@@ -83,18 +89,20 @@ const juegosFiltrados = computed(() => {
         :key="juego.id" 
         class="itch-card"
         :class="{ 'itch-out': !juego.disponible }"
-        @click="$emit('ver-detalle', juego)"
+        @click="router.push({ name: 'game-detail', params: { id: juego.id } })"
       >
         <div class="itch-card-image">
-          <img :src="juego.imagen" :alt="juego.titulo">
+          <img :src="juego.imagen_url" :alt="juego.titulo">
         </div>
         
         <div class="itch-card-content">
           <h2 class="itch-title">{{ juego.titulo }}</h2>
-          <p class="itch-category">{{ juego.categoria }}</p>
+          <p class="itch-category">{{ juego.generos || 'Sin categoría' }}</p>
           
           <div class="itch-footer">
-            <span class="itch-price">${{ juego.precio.toFixed(2) }}</span>
+            <span class="itch-price">
+              {{ juego.precio == 0 ? 'Gratis' : '$' + Number(juego.precio).toFixed(2) }}
+            </span>
             <span v-if="!juego.disponible" class="itch-badge">In development</span>
           </div>
         </div>
@@ -104,7 +112,6 @@ const juegosFiltrados = computed(() => {
 </template>
 
 <style scoped>
-/* Estilos itch.io limpios */
 .itch-catalog {
   max-width: 1100px;
   margin: 0 auto;
