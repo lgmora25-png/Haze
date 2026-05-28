@@ -1,33 +1,34 @@
-import { createRouter, createWebHistory } from 'vue-router';
+// src/router/index.js
+import { createRouter, createWebHistory } from 'vue-router'
 
-// 1. Importaciones limpias usando el alias @
-import SearchGame from '@/views/juegos/search-game.vue';
-import AddGame from '@/views/juegos/add-game.vue';
-import InfoGame from '@/views/juegos/info-game.vue'; 
+// Importamos tus componentes (ajusta la ruta de carpetas si es necesario)
+import SearchGame from '../juegos/search-game.vue'
+import AddGame from '../juegos/add-game.vue'
+import InfoGame from '../juegos/info-game.vue'
 
-// 2. Definimos las rutas de la plataforma
 const routes = [
   {
     path: '/',
-    name: 'catalog',
+    name: 'explorar',
     component: SearchGame
   },
   {
-    path: '/subir-juego',
-    name: 'add-game',
+    path: '/subir',
+    name: 'subir-juego',
     component: AddGame
   },
   {
-    path: '/juego/:id', 
-    name: 'game-detail',
+    // Usamos :id dinámico para saber qué juego abrir
+    path: '/juego/:id',
+    name: 'detalle-juego',
     component: InfoGame,
-    props: true 
+    props: true // Permite recibir el id directamente como una Prop
   }
-];
+]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
-});
+})
 
-export default router;
+export default router

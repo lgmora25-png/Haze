@@ -1,110 +1,64 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
+// 1. Definimos que este componente puede emitir el evento 'ver-detalle'
+const emit = defineEmits(['ver-detalle'])
 
 const juegos = ref([])
 const cargando = ref(true)
-const errorMensaje = ref(null)
-
 const textoBusqueda = ref('')
-const filtroAplicado = ref('')
 
 onMounted(async () => {
   try {
-    cargando.value = true
-    errorMensaje.value = null
-    
-    // Cambiamos 'localhost' por la IP directa '127.0.0.1' para romper el ERR_CONNECTION_REFUSED
-    const respuesta = await fetch('http://127.0.0.1:3000/api/juegos')
-    
-    if (!respuesta.ok) {
-      throw new Error(`Error en el servidor backend (Código: ${respuesta.status}).`)
-    }
-    
-    juegos.value = await respuesta.json()
-  } catch (error) {
-    // Si la conexión vuelve a rebotar por completo, dará un mensaje más claro
-    errorMensaje.value = error.message === 'Failed to fetch' 
-      ? 'No se pudo conectar con el servidor de HAZE. Asegúrate de que el backend esté encendido.' 
-      : error.message
-    console.error(error)
+    const res = await fetch('http://localhost:3000/api/juegos')
+    juegos.value = await res.json()
+  } catch (err) {
+    console.error("Error al cargar:", err)
   } finally {
     cargando.value = false
   }
 })
 
-const buscar = () => {
-  filtroAplicado.value = textoBusqueda.value
-}
-
 const juegosFiltrados = computed(() => {
-  if (!filtroAplicado.value.trim()) {
-    return juegos.value
-  }
-  return juegos.value.filter(juego => 
-    juego.titulo.toLowerCase().includes(filtroAplicado.value.toLowerCase())
+  return juegos.value.filter(j => 
+    j.titulo.toLowerCase().includes(textoBusqueda.value.toLowerCase())
   )
 })
+
+// 2. En lugar de usar router, ahora emitimos el juego hacia App.vue
+const irADetalle = (juego) => {
+  emit('ver-detalle', juego)
+}
 </script>
 
 <template>
-  <div class="itch-catalog">
-    
-    <div class="search-container">
+  <div class="catalog-page">
+    <header class="catalog-header">
+      <h1>Explora HAZE</h1>
       <input 
         v-model="textoBusqueda" 
-        @keyup.enter="buscar"
         type="text" 
-        placeholder="Introduce el nombre de un juego..." 
-        class="search-input"
+        placeholder="Buscar juegos..." 
+        class="search-bar"
       />
-      <button @click="buscar" class="btn-search">
-        🔍 Buscar juegos
-      </button>
-    </div>
-
-    <header class="itch-header">
-      <h1>Featured Games</h1>
-      <p v-if="filtroAplicado">Resultados para: "{{ filtroAplicado }}"</p>
-      <p v-else>Latest titles on HAZE</p>
     </header>
 
-    <div v-if="cargando" class="no-results">
-      ⏳ Cargando el catálogo de HAZE...
-    </div>
+    <div v-if="cargando" class="loader">Cargando catálogo...</div>
 
-    <div v-else-if="errorMensaje" class="no-results" style="color: #da5b5b; border-color: #da5b5b;">
-      ⚠️ Error: {{ errorMensaje }}
-    </div>
-
-    <div v-else-if="juegosFiltrados.length === 0" class="no-results">
-      No se encontraron videojuegos que coincidan con tu búsqueda.
-    </div>
-
-    <main v-else class="itch-grid">
+    <main v-else class="game-grid">
       <article 
         v-for="juego in juegosFiltrados" 
-        :key="juego.id" 
-        class="itch-card"
-        :class="{ 'itch-out': !juego.disponible }"
-        @click="router.push({ name: 'game-detail', params: { id: juego.id } })"
+        :key="juego.juego_id || juego.id" 
+        class="game-card" 
+        @click="irADetalle(juego)"
       >
-        <div class="itch-card-image">
+        <div class="img-container">
           <img :src="juego.imagen_url" :alt="juego.titulo">
         </div>
-        
-        <div class="itch-card-content">
-          <h2 class="itch-title">{{ juego.titulo }}</h2>
-          <p class="itch-category">{{ juego.generos || 'Sin categoría' }}</p>
-          
-          <div class="itch-footer">
-            <span class="itch-price">
-              {{ juego.precio == 0 ? 'Gratis' : '$' + Number(juego.precio).toFixed(2) }}
-            </span>
-            <span v-if="!juego.disponible" class="itch-badge">In development</span>
-          </div>
+        <div class="card-content">
+          <h3>{{ juego.titulo }}</h3>
+          <p class="genre">{{ juego.generos }}</p>
+          <div class="price-tag">{{ juego.precio == 0 ? 'Gratis' : '$' + juego.precio }}</div>
         </div>
       </article>
     </main>
@@ -112,155 +66,22 @@ const juegosFiltrados = computed(() => {
 </template>
 
 <style scoped>
-.itch-catalog {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 10px 0;
-}
+.catalog-page { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+.catalog-header { margin-bottom: 40px; text-align: center; }
+.search-bar { width: 100%; max-width: 500px; padding: 12px 20px; border-radius: 25px; border: 1px solid #444; background: #1a1a1a; color: white; margin-top: 15px; }
+.search-bar:focus { outline: 1px solid #da5b5b; }
 
-.search-container {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 30px;
-  background-color: #2b2b2b;
-  padding: 12px;
-  border-radius: 4px;
-}
+.game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 30px; }
 
-.search-input {
-  flex: 1;
-  background-color: #1c1c1c;
-  border: 1px solid #434343;
-  padding: 8px 12px;
-  color: #fff;
-  border-radius: 4px;
-  font-size: 0.95rem;
-}
+.game-card { background: #1a1a1a; border-radius: 12px; overflow: hidden; cursor: pointer; transition: transform 0.3s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+.game-card:hover { transform: translateY(-10px); }
 
-.search-input:focus {
-  outline: 1px solid #da5b5b;
-}
+.img-container { aspect-ratio: 16/9; overflow: hidden; }
+.img-container img { width: 100%; height: 100%; object-fit: cover; }
 
-.btn-search {
-  background-color: #da5b5b;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.15s ease;
-}
-
-.btn-search:hover {
-  background-color: #c44a4a;
-}
-
-.itch-header {
-  border-bottom: 1px solid #333;
-  padding-bottom: 15px;
-  margin-bottom: 25px;
-  text-align: left;
-}
-
-.itch-header h1 {
-  font-size: 1.8rem;
-  color: #fff;
-  margin: 0;
-  font-weight: 600;
-}
-
-.itch-header p {
-  color: #858585;
-  margin: 5px 0 0 0;
-  font-size: 0.9rem;
-}
-
-.itch-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
-}
-
-.itch-card {
-  background-color: #2b2b2b;
-  border-radius: 4px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.itch-card:hover {
-  background-color: #383838;
-}
-
-.itch-card-image {
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  background-color: #111;
-  overflow: hidden;
-}
-
-.itch-card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.itch-card-content {
-  padding: 12px;
-}
-
-.itch-title {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #fff;
-  margin: 0 0 4px 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.itch-category {
-  font-size: 0.85rem;
-  color: #858585;
-  margin: 0 0 12px 0;
-}
-
-.itch-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.itch-price {
-  font-size: 0.95rem;
-  font-weight: 600;
-  background-color: #434343;
-  padding: 2px 6px;
-  border-radius: 3px;
-  color: #fff;
-}
-
-.itch-badge {
-  font-size: 0.75rem;
-  background-color: #4b5563;
-  color: #fff;
-  padding: 2px 6px;
-  border-radius: 3px;
-  text-transform: uppercase;
-  font-weight: bold;
-}
-
-.no-results {
-  text-align: center;
-  padding: 40px;
-  color: #858585;
-  background-color: #2b2b2b;
-  border-radius: 4px;
-}
-
-.itch-card.itch-out {
-  opacity: 0.75;
-}
+.card-content { padding: 15px; }
+.card-content h3 { margin: 0 0 5px 0; font-size: 1.1rem; color: #fff; }
+.genre { color: #888; font-size: 0.85rem; margin-bottom: 10px; }
+.price-tag { font-weight: bold; color: #da5b5b; }
+.loader { text-align: center; color: #aaa; margin-top: 50px; }
 </style>

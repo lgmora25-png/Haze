@@ -1,10 +1,13 @@
 import { Router } from 'express';
-import { JuegoController } from '../controllers/Juegocontroller.js';
+import { JuegoController } from '../controllers/juegocontroller.js';
 
 const router = Router();
 
-// Definimos las rutas y les asignamos su controlador correspondiente
-router.get('/', JuegoController.obtenerTodos);  // URL: /api/juegos (GET)
-router.post('/', JuegoController.crear);        // URL: /api/juegos (POST)
+
+router.get('/', JuegoController.obtenerTodos);  // GET /api/juegos
+router.post('/', JuegoController.crear);        // POST /api/juegos
+
+// Ahora Express podrá entender cuando alguien pida /api/juegos/1, /api/juegos/2, etc.
+router.get('/:id', JuegoController.obtenerPorId); 
 
 export default router;

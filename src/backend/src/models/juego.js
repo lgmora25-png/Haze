@@ -16,6 +16,6 @@ export class Juego {
 
   // Validación de calidad: Verificar si el objeto tiene los datos mínimos obligatorios
   esValido() {
-    return !!(this.titulo && this.imagen_url);
+    return !!(this.titulo && this.imagen_url && this.generos); // El título, la imagen y los géneros son obligatorios para considerar el juego como válido
   }
 }

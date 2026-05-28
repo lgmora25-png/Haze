@@ -1,241 +1,168 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-defineEmits(['volver'])
+const router = useRouter()
+const cargando = ref(false)
 
+// Estado del formulario
+const juego = ref({
+  titulo: '',
+  precio: 0,
+  generos: '',
+  descripcion: '',
+  imagen_url: '' // Aquí se guarda el texto Base64 de la foto local
+})
 
-const titulo = ref('')
-const categoria = ref('')
-const precio = ref(0)
-const imagen = ref('')
-const disponible = ref(true)
+// Función para procesar la imagen local de la PC
+const procesarImagen = (event) => {
+  const archivo = event.target.files[0]
+  if (archivo) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      juego.value.imagen_url = e.target.result
+    }
+    reader.readAsDataURL(archivo)
+  }
+}
 
-
-const guardarJuego = () => {
-  // Aquí armamos el objeto con la información limpia
-  const nuevoJuego = {
-    titulo: titulo.value,
-    categoria: categoria.value,
-    precio: parseFloat(precio.value) || 0,
-    imagen: imagen.value || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80',
-    disponible: disponible.value
+const publicarJuego = async () => {
+  if (!juego.value.titulo || !juego.value.imagen_url) {
+    alert("Por favor, completa al menos el título y selecciona una imagen.")
+    return
   }
 
-  console.log('Guardando en HAZE:', nuevoJuego)
-  alert(`¡${nuevoJuego.titulo} se ha configurado con éxito de forma local!`)
+  cargando.value = true
+
+  try {
+    // === PASO 1: VALIDACIÓN DE DUPLICADOS ===
+    // Consultamos los juegos que ya están guardados en la base de datos
+    const resValidar = await fetch('http://localhost:3000/api/juegos')
+    
+    if (resValidar.ok) {
+      const juegosExistentes = await resValidar.json()
+
+      // 1. Validar si el título ya existe (ignorando mayúsculas/minúsculas y espacios extras)
+      const tituloExiste = juegosExistentes.some(
+        j => j.titulo.trim().toLowerCase() === juego.value.titulo.trim().toLowerCase()
+      )
+
+      // 2. Validar si la cadena de la imagen (Base64) ya existe
+      const imagenExiste = juegosExistentes.some(
+        j => j.imagen_url === juego.value.imagen_url
+      )
+
+      // Si el título se repite, detenemos el proceso
+      if (tituloExiste) {
+        alert("❌ Error: Ya existe un juego publicado con este título en HAZE.")
+        cargando.value = false
+        return
+      }
+
+      // Si la imagen se repite, detenemos el proceso
+      if (imagenExiste) {
+        alert("❌ Error: Esta imagen ya está siendo utilizada por otro juego en la plataforma.")
+        cargando.value = false
+        return
+      }
+    }
+
+    // === PASO 2: REGISTRO DEL JUEGO (Si pasó las validaciones) ===
+    const res = await fetch('http://localhost:3000/api/juegos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(juego.value)
+    })
+    
+    if (res.ok) {
+      alert('¡Juego publicado con éxito!')
+      router.push('/') // Volvemos al catálogo
+    } else {
+      const errorData = await res.json()
+      alert('Error: ' + (errorData.error || 'No se pudo publicar'))
+    }
+  } catch (err) {
+    console.error("Error en el flujo:", err)
+    alert("Hubo un problema al conectar con el servidor.")
+  } finally {
+    cargando.value = false
+  }
 }
 </script>
 
 <template>
-  <div class="itch-add-game">
-    <button class="btn-back" @click="$emit('volver')">
-      ⬅ Volver al catálogo
-    </button>
-
-    <header class="form-header">
-      <h1>Create a new project</h1>
-      <p>Subir un nuevo videojuego independiente a la red de HAZE</p>
+  <div class="add-game-page">
+    <header class="header">
+      <h1>Subir un nuevo juego</h1>
+      <p>Comparte tu creación con la comunidad de HAZE.</p>
     </header>
 
-    <div class="form-container">
-      <form @submit.prevent="guardarJuego">
+    <form @submit.prevent="publicarJuego" class="game-form">
+      <div class="form-group">
+        <label>Título del juego</label>
+        <input v-model="juego.titulo" type="text" required placeholder="Ej: Project Zomboid" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Precio ($)</label>
+          <input v-model="juego.precio" type="number" step="0.01" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Géneros</label>
+          <input v-model="juego.generos" type="text" placeholder="Ej: Survival, RPG" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Portada del juego (Selecciona un archivo de tu PC)</label>
+        <input 
+          type="file" 
+          accept="image/*" 
+          @change="procesarImagen" 
+          required 
+          class="file-input"
+        />
         
-        <div class="form-group">
-          <label for="title">Title</label>
-          <input 
-            id="title"
-            v-model="titulo" 
-            type="text" 
-            placeholder="Ej. Project Zomboid 2" 
-            required 
-          />
+        <div v-if="juego.imagen_url" class="preview-container">
+          <p>Vista previa de la portada:</p>
+          <img :src="juego.imagen_url" alt="Previsualización" class="image-preview" />
         </div>
+      </div>
 
-        <div class="form-group">
-          <label for="category">Classification / Genre</label>
-          <input 
-            id="category"
-            v-model="categoria" 
-            type="text" 
-            placeholder="Ej. Survival Horror, Metroidvania" 
-            required 
-          />
-        </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea v-model="juego.descripcion" rows="5" required placeholder="Cuenta de qué trata tu juego..."></textarea>
+      </div>
 
-        <div class="form-group">
-          <label for="price">Pricing ($ USD)</label>
-          <input 
-            id="price"
-            v-model="precio" 
-            type="number" 
-            step="0.01" 
-            min="0"
-            placeholder="0.00" 
-          />
-          <span class="field-help">Coloca 0 si tu juego es Free-to-play o Name Your Own Price.</span>
-        </div>
-
-        <div class="form-group">
-          <label for="image">Cover Image URL</label>
-          <input 
-            id="image"
-            v-model="imagen" 
-            type="url" 
-            placeholder="https://ejemplo.com/portada.png" 
-          />
-          <span class="field-help">Pega el enlace de una imagen horizontal para la tarjeta del catálogo.</span>
-        </div>
-
-        <div class="form-group checkbox-group">
-          <input 
-            id="visibility"
-            v-model="disponible" 
-            type="checkbox" 
-          />
-          <label for="visibility">Publicado y disponible para la venta inmediata</label>
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" class="btn-submit-project">
-            Save & view page
-          </button>
-        </div>
-
-      </form>
-    </div>
+      <button type="submit" class="btn-publish" :disabled="cargando">
+        {{ cargando ? 'Verificando y publicando...' : 'Publicar juego' }}
+      </button>
+    </form>
   </div>
 </template>
 
 <style scoped>
-.itch-add-game {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 10px 0;
-}
+.add-game-page { max-width: 600px; margin: 40px auto; padding: 20px; }
+.header { margin-bottom: 30px; text-align: center; }
+.header h1 { font-size: 2rem; color: #fff; margin-bottom: 10px; }
+.header p { color: #888; }
 
-.btn-back {
-  background: none;
-  border: 1px solid #434343;
-  color: #dadada;
-  padding: 8px 14px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  margin-bottom: 25px;
-  transition: all 0.15s ease;
-}
+.game-form { background: #1a1a1a; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.form-group { margin-bottom: 20px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-.btn-back:hover {
-  background-color: #2b2b2b;
-  border-color: #858585;
-  color: #fff;
-}
+label { display: block; margin-bottom: 8px; color: #aaa; font-size: 0.9rem; }
+input, textarea { width: 100%; padding: 12px; background: #2b2b2b; border: 1px solid #444; border-radius: 6px; color: white; box-sizing: border-box; }
+input:focus, textarea:focus { outline: 1px solid #da5b5b; }
 
-.form-header {
-  border-bottom: 1px solid #333;
-  padding-bottom: 15px;
-  margin-bottom: 30px;
-  text-align: left;
-}
+.file-input { padding: 10px; background: #2b2b2b; cursor: pointer; }
 
-.form-header h1 {
-  font-size: 1.8rem;
-  color: #fff;
-  margin: 0;
-  font-weight: 600;
-}
+.preview-container { margin-top: 15px; padding: 15px; background: #222; border-radius: 8px; border: 1px dashed #444; text-align: center; }
+.preview-container p { font-size: 0.85rem; color: #888; margin: 0 0 10px 0; }
+.image-preview { max-width: 100%; max-height: 200px; border-radius: 6px; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 
-.form-header p {
-  color: #858585;
-  margin: 5px 0 0 0;
-  font-size: 0.9rem;
-}
-
-/* Caja contenedora del formulario */
-.form-container {
-  background-color: #2b2b2b;
-  padding: 25px;
-  border-radius: 4px;
-  border: 1px solid #333;
-  text-align: left;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.form-group input[type="text"],
-.form-group input[type="number"],
-.form-group input[type="url"] {
-  background-color: #1c1c1c;
-  border: 1px solid #434343;
-  padding: 10px 12px;
-  color: #fff;
-  border-radius: 4px;
-  font-size: 0.95rem;
-  transition: border-color 0.15s;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: #da5b5b;
-}
-
-.field-help {
-  font-size: 0.8rem;
-  color: #858585;
-}
-
-/* Grupo especial para el Checkbox */
-.checkbox-group {
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-  cursor: pointer;
-}
-
-.checkbox-group input {
-  width: 16px;
-  height: 16px;
-  accent-color: #da5b5b;
-}
-
-.checkbox-group label {
-  font-weight: normal;
-  font-size: 0.9rem;
-  color: #dadada;
-}
-
-/* Botón de guardar estilo itch.io */
-.form-actions {
-  border-top: 1px solid #333;
-  padding-top: 20px;
-  margin-top: 30px;
-}
-
-.btn-submit-project {
-  background-color: #da5b5b;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  font-size: 1rem;
-  font-weight: bold;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.btn-submit-project:hover {
-  background-color: #c44a4a;
-}
+.btn-publish { width: 100%; padding: 15px; background: #da5b5b; border: none; color: white; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+.btn-publish:hover { background: #b04848; }
+.btn-publish:disabled { background: #555; cursor: not-allowed; }
 </style>

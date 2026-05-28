@@ -1,109 +1,109 @@
-<script setup>
-// Tu archivo router/index.js se encarga de cargarlos dinámicamente.
-</script>
-
 <template>
-  <div class="haze-app-container">
-    
-    <nav class="navbar-global">
-      <div class="nav-links-left">
-        <router-link to="/" class="nav-logo">HAZE 👾</router-link>
-      </div>
-      
+  <div id="app">
+    <!-- Navbar Global -->
+    <nav class="itch-navbar">
+      <div class="logo" @click="irAPantalla('search')">HAZE</div>
       <div class="nav-links">
-        <router-link 
-          to="/" 
-          class="nav-btn"
-          active-class="active"
-        >
-          Ver Catálogo
-        </router-link>
-        
-        <router-link 
-          to="/subir-juego" 
-          class="nav-btn btn-accent"
-          active-class="active"
-        >
-          ➕ Subir Juego
-        </router-link>
+        <button 
+          @click="irAPantalla('search')" 
+          :class="{ active: pantallaActual === 'search' }">Explorar</button>
+        <button 
+          @click="irAPantalla('add')" 
+          :class="{ active: pantallaActual === 'add' }">➕ Subir Juego</button>
       </div>
     </nav>
 
+    <!-- Escenario Dinámico -->
     <main class="main-content">
-      <router-view />
+      <SearchGame 
+        v-if="pantallaActual === 'search'" 
+        @ver-detalle="(juego) => irAPantalla('view', juego)" 
+      />
+      <AddGame 
+        v-if="pantallaActual === 'add'" 
+        @volver="irAPantalla('search')" 
+      />
+      <InfoGame 
+        v-if="pantallaActual === 'view'" 
+        :juego="juegoSeleccionado" 
+        @volver="irAPantalla('search')" 
+      />
     </main>
-
   </div>
 </template>
 
+<script setup>
+import { ref } from 'vue';
+import SearchGame from './juegos/search-game.vue';
+import AddGame from './juegos/add-game.vue';
+import InfoGame from './juegos/info-game.vue';
+
+const pantallaActual = ref('search');
+const juegoSeleccionado = ref(null);
+
+const irAPantalla = (pantalla, juego = null) => {
+  pantallaActual.value = pantalla;
+  juegoSeleccionado.value = juego;
+  
+  // Opcional: Esto ayuda a que siempre empieces a ver la página desde arriba
+  window.scrollTo(0, 0);
+};
+</script>
 <style>
-/* Mantenemos tus estilos globales y paleta de colores original */
+/* Reset básico si no lo tienes */
 body {
   margin: 0;
-  background-color: #1c1c1c;
-  color: #dadada;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #121212; /* Fondo oscuro base */
+  color: #fff;
 }
 
-.navbar-global {
+/* NAVBAR GLOBAL */
+.itch-navbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* Logo a la izquierda, botones a la derecha */
   align-items: center;
-  background-color: #2b2b2b;
-  padding: 10px 30px;
+  padding: 15px 40px;
+  background-color: #1a1a1a;
   border-bottom: 1px solid #333;
 }
 
-.nav-logo {
-  font-size: 1.4rem;
-  font-weight: bold;
+.logo {
+  font-size: 1.8rem;
+  font-weight: 900;
   color: #fff;
   cursor: pointer;
-  letter-spacing: 1px;
-  text-decoration: none;
+  letter-spacing: 2px;
 }
 
 .nav-links {
   display: flex;
-  gap: 15px;
+  gap: 15px; /* Espacio entre los botones */
 }
 
-.nav-btn {
-  background: none;
+/* Estilo de los botones del Navbar */
+.nav-links button {
+  background: transparent;
   border: none;
-  color: #858585;
-  font-size: 0.95rem;
+  color: #aaa;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  padding: 6px 12px;
-  border-radius: 4px;
-  transition: color 0.15s;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
+  padding: 8px 12px;
+  transition: color 0.3s ease;
 }
 
-/* El estado hover y la clase active que Vue Router controla por sí solo */
-.nav-btn:hover, .nav-btn.active {
+.nav-links button:hover {
   color: #fff;
 }
 
-/* Tu característico botón de acento rojo para HAZE */
-.nav-btn.btn-accent {
-  background-color: #da5b5b;
-  color: white;
-}
-
-.nav-btn.btn-accent:hover {
-  background-color: #c44a4a;
-}
-
-/* El botón rojo se oscurece un poco al estar activo para que resalte correctamente */
-.nav-btn.btn-accent.active {
-  background-color: #a83b3b;
+/* El indicador de página activa (la línea roja abajo) */
+.itch-navbar button.active {
+  color: #da5b5b;
+  border-bottom: 2px solid #da5b5b;
 }
 
 .main-content {
-  padding: 20px;
+  padding-top: 20px;
 }
 </style>
