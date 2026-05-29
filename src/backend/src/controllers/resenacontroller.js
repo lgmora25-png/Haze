@@ -1,4 +1,6 @@
-import { Resena } from '../models/Resena.js'; // Ajusta la ruta según tu estructura de carpetas
+import { ResenaRepository } from '../repositories/ResenaRepository.js'
+
+const resenaRepository = new ResenaRepository()
 
 export const resenaController = {
   /**
@@ -9,8 +11,7 @@ export const resenaController = {
     try {
       const { juegoId } = req.params;
       
-      // Llamada al método estático del Modelo
-      const listaResenas = await Resena.obtenerPorJuego(juegoId);
+      const listaResenas = await resenaRepository.obtenerPorJuego(juegoId);
       
       res.json(listaResenas);
     } catch (error) {
@@ -44,8 +45,8 @@ export const resenaController = {
       // const existe = await Resena.verificarDuplicado(juego_id, usuario_nombre);
       // if (existe) return res.status(400).json({ mensaje: 'Solo puede tener una reseña publicada por juego' });
 
-      // Instanciar y guardar la reseña a través del Modelo (OOP)
-      const nuevaResena = await Resena.guardar({
+      // Instanciar y guardar la reseña a través del repositorio
+      const nuevaResena = await resenaRepository.guardar({
         juego_id,
         usuario_nombre,
         rating,
@@ -71,8 +72,7 @@ export const resenaController = {
     try {
       const { id } = req.params;
 
-      // Llamada al método estático del Modelo para borrar de Supabase
-      await Resena.eliminar(id);
+      await resenaRepository.eliminar(id);
 
       // === HISTORIA DE USUARIO 6: CRITERIO DE ACEPTACIÓN 2 ===
       // Respuesta textual obligatoria según las pautas de tu ERS

@@ -1,4 +1,3 @@
-<!-- register.vue -->
 <template>
   <div class="auth-page">
     <div class="auth-box">
@@ -69,6 +68,12 @@ const registrarUsuario = async () => {
     return;
   }
 
+  // NUEVA VALIDACIÓN: Mínimo 8 caracteres requeridos por el ERS
+  if (contrasena.length < 8) {
+    mensajeError.value = "La contraseña tiene que ser mínimo de 8 caracteres";
+    return;
+  }
+
   // 2. Conexión con la Base de Datos (Backend en puerto 3000)
   try {
     const res = await fetch('http://localhost:3000/api/usuarios/registro', {
@@ -87,9 +92,8 @@ const registrarUsuario = async () => {
       // Diagrama HU3: "El usuario no existe"
       mensajeExito.value = "El usuario se registro en del sistema"; 
       
-      // Simulamos el inicio de sesión automático para que aparezca el botón del perfil
-      // El backend devuelve: { usuario: usuarioCreado }
-      localStorage.setItem('usuario_id', data.usuario?.id);
+      // Guardamos el ID real que devuelve el backend tras insertar correctamente
+      localStorage.setItem('usuario_id', data.usuario.id);
     }
   } catch (error) {
     mensajeError.value = "Error al conectar con el servidor.";
@@ -109,20 +113,19 @@ const irAlInicio = () => {
   min-height: 70vh; 
 }
 
-/* MODIFICADO: Aumentamos el tamaño de la tarjeta (ancho y alto) */
 .auth-box { 
   background: #1a1a1a; 
   padding: 40px; 
   border-radius: 12px; 
   width: 100%; 
-  max-width: 550px; /* Antes 400px */
-  min-height: 500px; /* Nuevo alto mínimo */
+  max-width: 550px; 
+  min-height: 500px; 
   box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
   text-align: center; 
   border: 1px solid #333;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Centra todo el contenido verticalmente */
+  justify-content: center; 
 }
 
 .auth-box h2 { color: #fff; margin-bottom: 20px; }
@@ -150,7 +153,6 @@ input:focus { border-color: #da5b5b; outline: none; }
 .alert.error { background: rgba(218, 91, 91, 0.2); color: #ff6b6b; border: 1px solid #da5b5b; }
 .alert.success { background: rgba(76, 175, 80, 0.2); color: #4caf50; border: 1px solid #4caf50; }
 
-/* NUEVO: Estilos para el texto de "¿Ya tienes una cuenta?" */
 .auth-link {
   text-align: center;
   margin-top: 25px;
@@ -159,7 +161,7 @@ input:focus { border-color: #da5b5b; outline: none; }
 }
 
 .auth-link a {
-  color: #da5b5b; /* Se ajusta al mismo color salmón/rojo de tus botones */
+  color: #da5b5b; 
   text-decoration: none;
   font-weight: bold;
   margin-left: 5px;

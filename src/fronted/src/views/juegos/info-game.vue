@@ -108,6 +108,27 @@ const enviarResena = async () => {
   }
 }
 
+const eliminarResena = async (id) => {
+  if (!confirm('¿Seguro que deseas eliminar esta reseña?')) return
+
+  errorMensaje.value = ''
+  try {
+    const res = await fetch(`http://localhost:3000/api/resenas/${id}`, {
+      method: 'DELETE'
+    })
+
+    const responseData = await res.json()
+    if (!res.ok) {
+      throw new Error(responseData.error || 'No se pudo eliminar la reseña')
+    }
+
+    reviews.value = reviews.value.filter(review => review.id !== id)
+  } catch (err) {
+    console.error(err)
+    errorMensaje.value = err.message || 'Error al eliminar la reseña.'
+  }
+}
+
 onMounted(async () => {
   await loadGameData()
   await loadReviews()
@@ -155,7 +176,16 @@ const volver = () => router.push('/')
               <div v-for="review in reviews" :key="review.id" class="review-box">
                 <div class="review-meta">
                   <strong>{{ review.usuario_nombre }}</strong>
-                  <span class="rating">★ {{ review.rating }}</span>
+                  <div class="review-meta-right">
+                    <span class="rating">★ {{ review.rating }}</span>
+                    <button
+                      type="button"
+                      class="btn-delete"
+                      @click="eliminarResena(review.id)"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
                 <p>{{ review.comentario }}</p>
                 <small>{{ new Date(review.creado_at).toLocaleDateString('es-ES') }}</small>
@@ -232,7 +262,11 @@ const volver = () => router.push('/')
 .reviews { margin-top: 40px; border-top: 1px solid #333; padding-top: 20px; }
 .review-box { background: #1a1a1a; padding: 20px; border-radius: 8px; margin-top: 15px; }
 .review-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; color: #ddd; }
+.review-meta-right { display: flex; align-items: center; gap: 12px; }
 .rating { color: #da5b5b; font-weight: 700; }
+.btn-delete { background: transparent; border: 1px solid #777; padding: 6px 12px; border-radius: 8px; color: #f27b7b; cursor: pointer; transition: background 0.2s ease; }
+.btn-delete:hover { background: rgba(242, 123, 123, 0.15); }
+.btn-delete:active { transform: translateY(1px); }
 .review-form { margin-top: 25px; padding: 20px; background: #141414; border: 1px solid #333; border-radius: 12px; }
 .review-group { margin-bottom: 16px; }
 .review-row { display: grid; grid-template-columns: 1fr; gap: 16px; }
