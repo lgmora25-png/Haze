@@ -1,20 +1,50 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const props = defineProps({
   juego: Object
 })
-const emit = defineEmits(['volver'])
 
+const route = useRoute()
+const router = useRouter()
+
+const juegoLocal = ref(null)
 const reviews = ref([])
 const nuevoComentario = ref('')
 const nuevoRating = ref(5)
 const nuevoUsuario = ref('')
+const cargandoJuego = ref(false)
 const cargandoResenas = ref(false)
 const cargandoEnvio = ref(false)
 const errorMensaje = ref('')
 
-const juegoId = computed(() => props.juego?.juego_id ?? props.juego?.id ?? '')
+// El ID ahora puede venir de la prop o de la URL del navegador
+const juegoId = computed(() => props.juego?.juego_id ?? props.juego?.id ?? route.params.id ?? route.params.juego_id ?? '')
+
+const loadGameData = async () => {
+  if (!juegoId.value) return
+
+  // Si llega por props (opcional), úsala solo si realmente trae datos.
+  if (props.juego && (props.juego.titulo || props.juego.juego_id || props.juego.id)) {
+    juegoLocal.value = props.juego
+    return
+  }
+
+  cargandoJuego.value = true
+  try {
+    const res = await fetch(`http://localhost:3000/api/juegos/${juegoId.value}`)
+    if (res.ok) {
+      const data = await res.json()
+      // Si la API devuelve el objeto dentro de una propiedad 'data'
+      juegoLocal.value = data.data || data
+    }
+  } catch (err) {
+    console.error("Error cargando el juego:", err)
+  } finally {
+    cargandoJuego.value = false
+  }
+}
 
 const loadReviews = async () => {
   if (!juegoId.value) return
@@ -78,32 +108,39 @@ const enviarResena = async () => {
   }
 }
 
-watch(
-  () => props.juego,
-  async (nuevoJuego) => {
-    if (nuevoJuego) await loadReviews()
-  },
-  { immediate: true }
-)
+onMounted(async () => {
+  await loadGameData()
+  await loadReviews()
+})
+
+// Si el ID cambia (por ejemplo, navegando entre juegos), recargamos todo
+watch(() => route.params.id, async () => {
+  await loadGameData()
+  await loadReviews()
+})
+
+const volver = () => router.push('/')
 </script>
 
 <template>
-  <div v-if="juego" class="game-page">
-    <button @click="$emit('volver')" class="btn-back">← Volver al catálogo</button>
+  <div v-if="juegoLocal" class="game-page">
+    <button @click="volver" class="btn-back">← Volver al catálogo</button>
 
     <header class="game-hero">
-      <h1>{{ juego.titulo }}</h1>
+      <h1>{{ juegoLocal.titulo }}</h1>
+      <h1>{{ juegoLocal.titulo || 'Cargando título...' }}</h1>
     </header>
 
     <div class="game-grid">
       <main class="content">
         <div class="image-wrapper">
-          <img :src="juego.imagen_url" :alt="juego.titulo">
+          <img :src="juegoLocal.imagen_url" :alt="juegoLocal.titulo">
+          <img :src="juegoLocal.imagen_url" :alt="juegoLocal.titulo">
         </div>
         
         <section class="description">
           <h3>Sobre este juego</h3>
-          <p>{{ juego.descripcion }}</p>
+          <p>{{ juegoLocal.descripcion }}</p>
         </section>
 
         <section class="reviews">
@@ -163,15 +200,15 @@ watch(
 
       <aside class="sidebar">
         <div class="buy-card">
-          <p class="price">{{ juego.precio == 0 ? 'Gratis' : '$' + juego.precio }}</p>
+          <p class="price">{{ juegoLocal.precio == 0 ? 'Gratis' : '$' + juegoLocal.precio }}</p>
           <button class="btn-action">Descargar ahora</button>
         </div>
         
         <div class="info-card">
           <h4>Detalles del título</h4>
           <ul>
-            <li><strong>Género:</strong> {{ juego.generos }}</li>
-            <li><strong>Estado:</strong> {{ juego.disponible ? 'Publicado' : 'En desarrollo' }}</li>
+            <li><strong>Género:</strong> {{ juegoLocal.generos }}</li>
+            <li><strong>Estado:</strong> {{ juegoLocal.disponible ? 'Publicado' : 'En desarrollo' }}</li>
           </ul>
         </div>
       </aside>

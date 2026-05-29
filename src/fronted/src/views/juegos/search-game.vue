@@ -1,33 +1,45 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
-// 1. Definimos que este componente puede emitir el evento 'ver-detalle'
-const emit = defineEmits(['ver-detalle'])
+const router = useRouter()
 
 const juegos = ref([])
 const cargando = ref(true)
+const mensajeError = ref('')
 const textoBusqueda = ref('')
 
 onMounted(async () => {
   try {
+    console.log("Intentando conectar con: http://localhost:3000/api/juegos");
     const res = await fetch('http://localhost:3000/api/juegos')
-    juegos.value = await res.json()
+    if (!res.ok) throw new Error(`Error del servidor: ${res.status}`);
+    
+    const data = await res.json()
+    // Validación: Si la API devuelve { data: [...] } en lugar de [...]
+    juegos.value = Array.isArray(data) ? data : (data.data || [])
+    
+    console.log("Juegos cargados con éxito:", juegos.value);
   } catch (err) {
-    console.error("Error al cargar:", err)
+    console.error("❌ Error en search-game.vue:", err)
+    mensajeError.value = 'No se pudo cargar el catálogo. Revisa si el backend (puerto 3000) está encendido.'
   } finally {
     cargando.value = false
   }
 })
 
 const juegosFiltrados = computed(() => {
+  if (!Array.isArray(juegos.value)) return []
   return juegos.value.filter(j => 
-    j.titulo.toLowerCase().includes(textoBusqueda.value.toLowerCase())
+    j.titulo?.toLowerCase().includes(textoBusqueda.value.toLowerCase())
   )
 })
 
-// 2. En lugar de usar router, ahora emitimos el juego hacia App.vue
+// Navegamos a la ruta de detalle usando el ID del juego
 const irADetalle = (juego) => {
-  emit('ver-detalle', juego)
+  const id = juego.juego_id || juego.id
+  if (!id) return
+  router.push(`/juego/${id}`)
 }
 </script>
 
@@ -44,8 +56,13 @@ const irADetalle = (juego) => {
     </header>
 
     <div v-if="cargando" class="loader">Cargando catálogo...</div>
+    <div v-else-if="mensajeError" class="error-message">{{ mensajeError }}</div>
 
-    <main v-else class="game-grid">
+    <main v-else>
+      <div v-if="juegosFiltrados.length === 0" class="empty-state">
+        No se encontraron juegos disponibles.
+      </div>
+      <div class="game-grid">
       <article 
         v-for="juego in juegosFiltrados" 
         :key="juego.juego_id || juego.id" 
@@ -61,6 +78,7 @@ const irADetalle = (juego) => {
           <div class="price-tag">{{ juego.precio == 0 ? 'Gratis' : '$' + juego.precio }}</div>
         </div>
       </article>
+      </div>
     </main>
   </div>
 </template>
@@ -84,4 +102,6 @@ const irADetalle = (juego) => {
 .genre { color: #888; font-size: 0.85rem; margin-bottom: 10px; }
 .price-tag { font-weight: bold; color: #da5b5b; }
 .loader { text-align: center; color: #aaa; margin-top: 50px; }
+.error-message { text-align: center; color: #da5b5b; margin-top: 50px; font-weight: bold; }
+.empty-state { text-align: center; color: #888; margin-top: 50px; }
 </style>

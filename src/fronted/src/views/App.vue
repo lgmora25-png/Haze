@@ -34,7 +34,11 @@ const estaLogueado = ref(false);
 // Si detecta que existe el 'usuario_id' en la memoria, muestra el perfil.
 // Si no, muestra el botón de registrarse.
 watch(route, () => {
-  estaLogueado.value = !!localStorage.getItem('usuario_id');
+  try {
+    estaLogueado.value = !!localStorage.getItem('usuario_id');
+  } catch (e) {
+    estaLogueado.value = false;
+  }
 }, { immediate: true });
 </script>
 
