@@ -1,4 +1,3 @@
-<!-- login.vue -->
 <template>
   <div class="auth-page">
     <div class="auth-box">
@@ -44,55 +43,66 @@ const formulario = ref({
 const mensajeError = ref('');
 const mensajeExito = ref('');
 
+// Función para conectar con el backend
 const iniciarSesion = async () => {
-  // Limpiamos mensajes previos
-  mensajeError.value = '';
-  mensajeExito.value = '';
-
-  const { correo, contrasena } = formulario.value;
-
-  // 1. Validación de campos vacíos
-  if (!correo || !contrasena) {
-    mensajeError.value = "Por favor, completa todos los campos.";
-    return;
-  }
-
   try {
-    // 2. Petición al backend
-    const res = await fetch('http://localhost:3000/api/usuarios/login', {
+    mensajeError.value = '';
+    mensajeExito.value = '';
+
+    const response = await fetch('http://localhost:3000/api/usuarios/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(formulario.value)
     });
 
-    const data = await res.json();
+    const data = await response.json();
 
-    // 3. Manejo de errores que responde el backend
-    if (!res.ok) {
-      // Mostrará "El usuario no existe" o "Contraseña incorrecta"
-      mensajeError.value = data.error || "Error al iniciar sesión"; 
-    } else {
-      // 4. Éxito
-      mensajeExito.value = "¡Bienvenido de vuelta!";
-      
-      // Guardamos la sesión en el navegador
-      localStorage.setItem('usuario_id', data.usuarioId);
-      
-      // Redirigimos al inicio después de un momentito para que vea el mensaje
-      setTimeout(() => {
-        router.push('/');
-      }, 1000);
+    if (!response.ok) {
+      throw new Error(data.error || 'Error al iniciar sesión');
     }
+
+    // 💾 GUARDADO EN LOCALSTORAGE
+    localStorage.setItem('usuarioId', data.usuarioId);
+    localStorage.setItem('rol', data.rol); // 👈 ¡Línea agregada! Guardará 'dueno' o 'usuario'
+
+    mensajeExito.value = data.mensaje || '¡Bienvenido de nuevo!';
+    
+    // Redirección al catálogo después de 1.5 segundos
+    setTimeout(() => {
+      router.push('/');
+    }, 1500);
+
   } catch (error) {
-    mensajeError.value = "Error al conectar con el servidor.";
+    mensajeError.value = error.message;
   }
 };
 </script>
 
 <style scoped>
-/* Pegar aquí todos los mismos estilos que ya tenías en tu login / register (auth-page, auth-box, alert, etc.) */
-.auth-page { display: flex; justify-content: center; align-items: center; min-height: 70vh; }
-.auth-box { background: #1a1a1a; padding: 40px; border-radius: 12px; width: 100%; max-width: 550px; min-height: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333; display: flex; flex-direction: column; justify-content: center; }
+.auth-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  background: #121212;
+  padding: 20px;
+}
+.auth-box { 
+  background: #1a1a1a; 
+  padding: 40px; 
+  border-radius: 12px; 
+  width: 100%; 
+  max-width: 550px; 
+  min-height: 500px; 
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+  text-align: center; 
+  border: 1px solid #333; 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
+}
 .auth-box h2 { color: #fff; margin-bottom: 20px; }
 .form-group { margin-bottom: 15px; text-align: left; }
 label { display: block; color: #aaa; margin-bottom: 5px; font-size: 0.9rem; font-weight: bold; }
@@ -101,12 +111,11 @@ input:focus { border-color: #da5b5b; outline: none; }
 .btn-submit { width: 100%; padding: 12px; margin-top: 15px; background: #da5b5b; border: none; color: white; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.3s; }
 .btn-submit:hover { background: #b04848; }
 
-/* Mensajes de alerta */
-.alert { padding: 10px; border-radius: 6px; margin-bottom: 15px; font-weight: bold; }
-.alert.error { background: rgba(218, 91, 91, 0.2); color: #ff6b6b; border: 1px solid #da5b5b; }
-.alert.success { background: rgba(76, 175, 80, 0.2); color: #4caf50; border: 1px solid #4caf50; }
+.auth-link { color: #aaa; margin-top: 20px; font-size: 0.9rem; }
+.auth-link a { color: #da5b5b; text-decoration: none; font-weight: bold; }
+.auth-link a:hover { text-decoration: underline; }
 
-.auth-link { text-align: center; margin-top: 25px; color: #a0a0a0; font-size: 14px; }
-.auth-link a { color: #da5b5b; text-decoration: none; font-weight: bold; margin-left: 5px; transition: color 0.3s; }
-.auth-link a:hover { text-decoration: underline; color: #fff; }
+.alert { padding: 12px; border-radius: 6px; margin-bottom: 20px; font-weight: bold; font-size: 0.95rem; text-align: center; }
+.alert.error { background: rgba(218, 91, 91, 0.15); color: #da5b5b; border: 1px solid rgba(218, 91, 91, 0.3); }
+.alert.success { background: rgba(76, 175, 80, 0.15); color: #4caf50; border: 1px solid rgba(76, 175, 80, 0.3); }
 </style>

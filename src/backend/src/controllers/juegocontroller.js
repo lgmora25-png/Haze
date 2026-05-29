@@ -1,46 +1,78 @@
-import { Juego } from '../models/juego.js';
-import { JuegoRepository } from '../repositories/JuegoRepository.js';
+// src/controllers/usuarioController.js
 
-const juegoRepository = new JuegoRepository();
+import { Usuario } from '../models/Usuario.js';
+import { UsuarioRepository } from '../repositories/UsuarioRepository.js';
 
-export class JuegoController {
-  static async obtenerTodos(req, res) {
+const usuarioRepository = new UsuarioRepository();
+
+export class UsuarioController {
+  
+  // === HU3: REGISTRAR PERFIL ===
+  static async registrar(req, res) {
     try {
-      const juegos = await juegoRepository.obtenerTodos();
-      return res.status(200).json(juegos);
-    } catch (error) {
-      console.error('❌ Error en JuegoController.obtenerTodos:', error.message);
-      return res.status(500).json({ error: 'Error al obtener los juegos.' });
-    }
-  }
+      const nuevoUsuario = new Usuario(req.body);
 
-  static async crear(req, res) {
-    try {
-      const nuevoJuego = await juegoRepository.crear(new Juego(req.body));
-      return res.status(201).json(nuevoJuego);
+      if (!nuevoUsuario.esValido()) {
+        return res.status(400).json({ error: "datos invalidos" });
+      }
+
+      const usuarioCreado = await usuarioRepository.crear(nuevoUsuario);
+
+      return res.status(201).json({
+        mensaje: "El usuario se registro en del sistema",
+        usuario: usuarioCreado,
+        usuarioId: usuarioCreado.id
+      });
+
     } catch (error) {
-      console.error('❌ Error en JuegoController.crear:', error.message);
-      const msg = String(error.message || '').toLowerCase();
-      if (msg.includes('duplicado') || msg.includes('ya existe')) {
+      if (error.message === "El usuario ya existe") {
         return res.status(409).json({ error: error.message });
       }
-      return res.status(500).json({ error: error.message || 'Error al crear el juego.' });
+      return res.status(500).json({ error: "Error en el servidor." });
     }
   }
 
-  static async obtenerPorId(req, res) {
+  // === LÓGICA DE LOGIN ===
+  static async login(req, res) {
     try {
-      const { id } = req.params;
-      const juego = await juegoRepository.obtenerPorId(id);
+      const { correo, contrasena } = req.body;
 
-      if (!juego) {
-        return res.status(404).json({ error: 'Juego no encontrado.' });
+      // Validación de seguridad por si envían campos vacíos
+      if (!correo || !contrasena) {
+        return res.status(400).json({ error: 'Faltan datos' });
       }
 
-      return res.status(200).json(juego);
+      const usuario = await usuarioRepository.loginUsuario(correo, contrasena);
+      
+      // 💡 MODIFICADO: Mandamos el ID y también el ROL extraído de Supabase para guardarlo en el localStorage
+      return res.status(200).json({ 
+        mensaje: 'Login exitoso', 
+        usuarioId: usuario.id,
+        rol: usuario.rol // 👈 Retornamos el rol real de la Base de Datos
+      });
+
     } catch (error) {
-      console.error('❌ Error en JuegoController.obtenerPorId:', error.message);
-      return res.status(500).json({ error: 'Error al buscar el juego.' });
+      // Capturamos si es "El usuario no existe" o "Contraseña incorrecta"
+      return res.status(401).json({ error: error.message });
+    }
+  }
+
+  // === HU4: CONSULTAR PERFIL ===
+  static async consultarPerfil(req, res) {
+    try {
+      const { id } = req.params;
+      
+      const usuario = await usuarioRepository.consultarPerfil(id); 
+
+      if (!usuario) {
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+
+      
+      return res.status(200).json(usuario);
+
+    } catch (error) {
+      return res.status(500).json({ error: "Error en el servidor al consultar perfil." });
     }
   }
 }
