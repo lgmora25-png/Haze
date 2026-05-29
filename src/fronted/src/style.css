@@ -294,3 +294,31 @@ code {
     border-right-color: var(--border);
   }
 }
+
+/* Ajusta el nombre de la clase a la que uses en tu contenedor oscuro */
+.card-registro {
+  width: 100%;
+  max-width: 550px; /* Aumenta el ancho (antes seguro estaba en 400px o menos) */
+  min-height: 500px; /* Le da más altura */
+  padding: 40px; /* Le da más "aire" por dentro */
+  /* Mantén tus otros estilos de fondo, borde, etc. */
+}
+
+/* Estilos para el texto de abajo */
+.auth-link {
+  text-align: center;
+  margin-top: 25px;
+  color: #a0a0a0; /* Gris clarito */
+  font-size: 14px;
+}
+
+.auth-link a {
+  color: #e55353; /* El color rojito/salmón de tu botón */
+  text-decoration: none;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.auth-link a:hover {
+  text-decoration: underline;
+}

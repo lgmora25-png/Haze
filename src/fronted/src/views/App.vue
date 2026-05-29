@@ -1,71 +1,65 @@
 <template>
   <div id="app">
-    <!-- Navbar Global -->
     <nav class="itch-navbar">
-      <div class="logo" @click="irAPantalla('search')">HAZE</div>
+      <router-link to="/" class="logo-link">
+        <div class="logo">HAZE</div>
+      </router-link>
+
       <div class="nav-links">
-        <button 
-          @click="irAPantalla('search')" 
-          :class="{ active: pantallaActual === 'search' }">Explorar</button>
-        <button 
-          @click="irAPantalla('add')" 
-          :class="{ active: pantallaActual === 'add' }">➕ Subir Juego</button>
+        <router-link to="/" class="nav-btn" active-class="active">Explorar</router-link>
+        <router-link to="/subir" class="nav-btn" active-class="active">➕ Subir Juego</router-link>
+        
+        <router-link v-if="!estaLogueado" to="/registro" class="nav-btn" active-class="active">Registrarse</router-link>
+        
+        <router-link v-else to="/perfil" class="nav-btn profile-circle" active-class="active">
+          <div class="avatar-circle">👤</div>
+        </router-link>
       </div>
     </nav>
 
-    <!-- Escenario Dinámico -->
     <main class="main-content">
-      <SearchGame 
-        v-if="pantallaActual === 'search'" 
-        @ver-detalle="(juego) => irAPantalla('view', juego)" 
-      />
-      <AddGame 
-        v-if="pantallaActual === 'add'" 
-        @volver="irAPantalla('search')" 
-      />
-      <InfoGame 
-        v-if="pantallaActual === 'view'" 
-        :juego="juegoSeleccionado" 
-        @volver="irAPantalla('search')" 
-      />
+      <router-view />
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import SearchGame from './juegos/search-game.vue';
-import AddGame from './juegos/add-game.vue';
-import InfoGame from './juegos/info-game.vue';
+import { ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
-const pantallaActual = ref('search');
-const juegoSeleccionado = ref(null);
+const route = useRoute();
+const estaLogueado = ref(false);
 
-const irAPantalla = (pantalla, juego = null) => {
-  pantallaActual.value = pantalla;
-  juegoSeleccionado.value = juego;
-  
-  // Opcional: Esto ayuda a que siempre empieces a ver la página desde arriba
-  window.scrollTo(0, 0);
-};
+// Esta función "observa" cada vez que cambias de página.
+// Si detecta que existe el 'usuario_id' en la memoria, muestra el perfil.
+// Si no, muestra el botón de registrarse.
+watch(route, () => {
+  estaLogueado.value = !!localStorage.getItem('usuario_id');
+}, { immediate: true });
 </script>
+
 <style>
-/* Reset básico si no lo tienes */
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #121212; /* Fondo oscuro base */
-  color: #fff;
+  padding: 0;
+  background-color: #121212; /* El negro de fondo de pantalla completa */
+  color: #ffffff; /* Letras blancas por defecto */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+</style>
 
-/* NAVBAR GLOBAL */
+<style scoped>
 .itch-navbar {
   display: flex;
-  justify-content: space-between; /* Logo a la izquierda, botones a la derecha */
+  justify-content: space-between;
   align-items: center;
   padding: 15px 40px;
   background-color: #1a1a1a;
   border-bottom: 1px solid #333;
+}
+
+.logo-link {
+  text-decoration: none; 
 }
 
 .logo {
@@ -78,11 +72,11 @@ body {
 
 .nav-links {
   display: flex;
-  gap: 15px; /* Espacio entre los botones */
+  gap: 15px;
+  align-items: center; /* Centra los botones y el círculo verticalmente */
 }
 
-/* Estilo de los botones del Navbar */
-.nav-links button {
+.nav-btn {
   background: transparent;
   border: none;
   color: #aaa;
@@ -90,17 +84,43 @@ body {
   font-weight: 600;
   cursor: pointer;
   padding: 8px 12px;
+  text-decoration: none; 
   transition: color 0.3s ease;
 }
 
-.nav-links button:hover {
+.nav-btn:hover {
   color: #fff;
 }
 
-/* El indicador de página activa (la línea roja abajo) */
-.itch-navbar button.active {
+/* El Vue Router aplica automáticamente esta clase cuando estás en esa ruta */
+.nav-btn.active {
   color: #da5b5b;
-  border-bottom: 2px solid #da5b5b;
+}
+
+/* Estilos especiales para el circulito del perfil */
+.profile-circle {
+  padding: 0;
+}
+
+.avatar-circle {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background-color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+.nav-btn.active .avatar-circle {
+  border-color: #da5b5b; /* Se ilumina el borde si estás en tu perfil */
+}
+
+.avatar-circle:hover {
+  border-color: #fff;
 }
 
 .main-content {

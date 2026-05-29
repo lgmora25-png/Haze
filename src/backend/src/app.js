@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import juegoRoutes from './routes/juegoRoutes.js'
+import usuarioRoutes from './routes/usuarioRoutes.js'
 import resenaRoutes from './routes/resenaRoutes.js'
 
 const app = express()
@@ -14,6 +15,7 @@ app.use(cors({
 
 app.use(express.json())
 app.use('/api/juegos', juegoRoutes)
+app.use('/api/usuarios', usuarioRoutes)
 app.use('/api/resenas', resenaRoutes)
 
 const PORT = 3000

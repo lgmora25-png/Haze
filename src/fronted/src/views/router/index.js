@@ -5,6 +5,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import SearchGame from '../juegos/search-game.vue'
 import AddGame from '../juegos/add-game.vue'
 import InfoGame from '../juegos/info-game.vue'
+import Register from '../Registro/register.vue'
+import Profile from '../Registro/profile.vue'
+import Login from '../Registro/login.vue'
 
 const routes = [
   {
@@ -23,6 +26,23 @@ const routes = [
     name: 'detalle-juego',
     component: InfoGame,
     props: true // Permite recibir el id directamente como una Prop
+  },
+  {
+    path: '/registro',
+    name: 'registro-perfil',
+    component: Register
+  },
+
+  // === HISTORIA DE USUARIO 4: Consultar Perfil ===
+  {
+    path: '/perfil',
+    name: 'mi-perfil',
+    component: Profile
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login
   }
 ]
 
