@@ -9,16 +9,22 @@ export class Usuario {
   }
 
   // === HISTORIA DE USUARIO 3 (Registrar Perfil) ===
-  // Validación de formato: Verifica que no haya campos vacíos y el correo sea válido
   esValido() {
     if (!this.nombre_usuario || !this.correo || !this.contrasena) {
       return false;
     }
+    
     // Expresión regular básica para validar el formato de correo con "@"
     const correoRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!correoRegex.test(this.correo)) {
       return false;
     }
+
+    // NUEVA VALIDACIÓN: Comprobar longitud mínima de la contraseña en el backend
+    if (this.contrasena.length < 8) {
+      return false;
+    }
+
     return true;
   }
 }
