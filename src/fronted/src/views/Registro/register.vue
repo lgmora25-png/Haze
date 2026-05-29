@@ -88,7 +88,8 @@ const registrarUsuario = async () => {
       mensajeExito.value = "El usuario se registro en del sistema"; 
       
       // Simulamos el inicio de sesión automático para que aparezca el botón del perfil
-      localStorage.setItem('usuario_id', data.usuarioId || '1');
+      // El backend devuelve: { usuario: usuarioCreado }
+      localStorage.setItem('usuario_id', data.usuario?.id);
     }
   } catch (error) {
     mensajeError.value = "Error al conectar con el servidor.";

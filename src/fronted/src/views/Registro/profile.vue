@@ -55,10 +55,28 @@ onMounted(async () => {
   }
 
   try {
-    const res = await fetch(`http://localhost:3000/api/usuarios/perfil/${sesionActivaId}`);
-    
+    const url = `http://localhost:3000/api/usuarios/perfil/${sesionActivaId}`;
+    const res = await fetch(url);
+
+
     if (!res.ok) {
-      mensajeError.value = "Perfil no encontrado";
+      const data = await res.json().catch(() => ({}));
+      mensajeError.value = data?.error || "Perfil no encontrado";
+
+      // Log más completo para depurar qué está pasando
+      console.error('GET /perfil error:', {
+        sesionActivaId,
+        status: res.status,
+        url: res.url,
+        data,
+        localStorageUsuarioId: localStorage.getItem('usuario_id')
+      });
+
+      // Si el backend responde 404 (perfil no existe), limpiamos sesión y redirigimos
+      if (res.status === 404 || data?.error === 'Perfil no encontrado') {
+        localStorage.removeItem('usuario_id');
+        router.push('/registro');
+      }
     } else {
       usuario.value = await res.json();
     }

@@ -20,7 +20,8 @@ export class UsuarioController {
 
       return res.status(201).json({
         mensaje: "El usuario se registro en del sistema",
-        usuario: usuarioCreado
+        usuario: usuarioCreado,
+        usuarioId: usuarioCreado.id
       });
 
     } catch (error) {

@@ -6,4 +6,7 @@ const app = createApp(App)
 
 app.use(router)
 
+// Debug rápido: saber si localStorage está quedando con valores viejos
+console.log('localStorage usuario_id inicial:', localStorage.getItem('usuario_id'))
+
 app.mount('#app')
