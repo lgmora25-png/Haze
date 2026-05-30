@@ -9,6 +9,9 @@ import Register from '../Registro/register.vue'
 import Profile from '../Registro/profile.vue'
 import Login from '../Registro/login.vue'
 import AdminMenu from '../usuario/admin-menu.vue'
+import ManagePayments from '../pagos/ManagePayments.vue'
+import ProcessPayment from '../pagos/process-payment.vue'
+import ConsultPayment from '../pagos/consult-payment.vue'
 
 const routes = [
   {
@@ -51,6 +54,24 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: Login
+  },
+  {
+    path: '/pagos/manage',
+    name: 'gestion-pagos',
+    component: ManagePayments,
+    meta: { requiresOwner: true }
+  },
+  {
+    path: '/pagos/process',
+    name: 'procesar-pago',
+    component: ProcessPayment,
+    meta: { requiresOwner: true }
+  },
+  {
+    path: '/pagos/consult',
+    name: 'consultar-pago',
+    component: ConsultPayment,
+    meta: { requiresOwner: true }
   }
 ]
 
@@ -67,7 +88,7 @@ router.beforeEach((to, from, next) => {
       return next()
     }
     // Mensaje simple y redirección al catálogo
-    window.alert('Acceso denegado: necesitas ser dueño para subir juegos.')
+    window.alert('Acceso denegado: necesitas ser dueño para acceder a esta sección.')
     return next({ name: 'explorar' })
   }
   return next()

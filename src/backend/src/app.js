@@ -3,6 +3,7 @@ import cors from 'cors'
 import juegoRoutes from './routes/juegoRoutes.js'
 import usuarioRoutes from './routes/usuarioRoutes.js'
 import resenaRoutes from './routes/resenaRoutes.js'
+import pagoRoutes from './routes/pagoRoutes.js'
 
 const app = express()
 
@@ -17,6 +18,7 @@ app.use(express.json())
 app.use('/api/juegos', juegoRoutes)
 app.use('/api/usuarios', usuarioRoutes)
 app.use('/api/resenas', resenaRoutes)
+app.use('/api/pagos', pagoRoutes)
 
 const PORT = 3000
 app.listen(PORT, () => {

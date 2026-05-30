@@ -55,7 +55,7 @@ const toggleMenu = () => {
 }
 
 const gestionarPago = () => {
-  alert('Espacio reservado para tu compañero: Gestión de pagos')
+  router.push('/pagos/manage')
 }
 
 const irASubir = () => {

@@ -181,6 +181,10 @@ watch(() => route.params.id, async () => {
   await loadReviews()
 })
 
+const irAProcesarPago = () => {
+  router.push('/pagos/process')
+}
+
 const volver = () => router.push('/')
 </script>
 
@@ -275,7 +279,7 @@ const volver = () => router.push('/')
       <aside class="sidebar">
         <div class="buy-card">
           <p class="price">{{ juegoLocal.precio == 0 ? 'Gratis' : '$' + juegoLocal.precio }}</p>
-          <button class="btn-action">Descargar ahora</button>
+          <button class="btn-action" @click="irAProcesarPago">Procesar Pago</button>
         </div>
         
         <div class="info-card">
