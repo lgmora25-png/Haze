@@ -43,11 +43,18 @@ export class UsuarioController {
       }
 
       const usuario = await usuarioRepository.loginUsuario(correo, contrasena);
+
+      // Si la base de datos ya tiene rol, lo usamos; si no, aplicamos un fallback por correo para pruebas
+      let rolAsignado = usuario.rol || 'usuario';
+      if (!usuario.rol && ['admin@ucab.edu.ve', 'dueno@haze.com'].includes(usuario.correo)) {
+        rolAsignado = 'dueno';
+      }
       
-      // Si pasa, mandamos el ID para guardarlo en el localStorage del frontend
+      // Si pasa, mandamos el ID y también el ROL para guardarlo en el localStorage del frontend
       return res.status(200).json({ 
         mensaje: 'Login exitoso', 
-        usuarioId: usuario.id 
+        usuarioId: usuario.id,
+        rol: rolAsignado
       });
 
     } catch (error) {
@@ -67,7 +74,15 @@ export class UsuarioController {
         return res.status(404).json({ error: "Perfil no encontrado" });
       }
 
-      return res.status(200).json(perfil);
+      let rolAsignado = perfil.rol || 'usuario';
+      if (!perfil.rol && ['admin@ucab.edu.ve', 'dueno@haze.com'].includes(perfil.correo)) {
+        rolAsignado = 'dueno';
+      }
+
+      return res.status(200).json({
+        ...perfil,
+        rol: rolAsignado
+      });
 
     } catch (error) {
       return res.status(500).json({ error: "Error al consultar el perfil." });

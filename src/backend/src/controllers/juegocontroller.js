@@ -1,78 +1,62 @@
-// src/controllers/usuarioController.js
+// src/backend/controllers/juegocontroller.js
 
-import { Usuario } from '../models/Usuario.js';
-import { UsuarioRepository } from '../repositories/UsuarioRepository.js';
+import { Juego } from '../models/Juego.js';
+import { JuegoRepository } from '../repositories/JuegoRepository.js';
 
-const usuarioRepository = new UsuarioRepository();
+const juegoRepository = new JuegoRepository();
 
-export class UsuarioController {
+export class JuegoController {
   
-  // === HU3: REGISTRAR PERFIL ===
-  static async registrar(req, res) {
+  // === HU1: BUSCAR/LISTAR JUEGOS ===
+  static async obtenerTodos(req, res) {
     try {
-      const nuevoUsuario = new Usuario(req.body);
+      const juegos = await juegoRepository.obtenerTodos();
+      return res.status(200).json(juegos);
+    } catch (error) {
+      return res.status(500).json({ error: "Error al obtener los juegos desde el servidor." });
+    }
+  }
 
-      if (!nuevoUsuario.esValido()) {
-        return res.status(400).json({ error: "datos invalidos" });
+  // === HU2: SUBIR/CREAR JUEGO ===
+  static async crear(req, res) {
+    try {
+      // Creamos la instancia del modelo Juego con los datos que llegan del frontend
+      const nuevoJuego = new Juego(req.body);
+
+      // Validación de las reglas de negocio del modelo
+      if (!nuevoJuego.esValido()) {
+        return res.status(400).json({ error: "Datos del juego inválidos o incompletos." });
       }
 
-      const usuarioCreado = await usuarioRepository.crear(nuevoUsuario);
+      // Guardamos en la base de datos de Supabase a través del repositorio
+      const juegoCreado = await juegoRepository.crear(nuevoJuego);
 
       return res.status(201).json({
-        mensaje: "El usuario se registro en del sistema",
-        usuario: usuarioCreado,
-        usuarioId: usuarioCreado.id
+        mensaje: "El juego se registró con éxito en el sistema",
+        juego: juegoCreado
       });
 
     } catch (error) {
-      if (error.message === "El usuario ya existe") {
+      if (error.message === "El juego ya existe") {
         return res.status(409).json({ error: error.message });
       }
-      return res.status(500).json({ error: "Error en el servidor." });
+      return res.status(500).json({ error: "Error interno en el servidor al guardar el juego." });
     }
   }
 
-  // === LÓGICA DE LOGIN ===
-  static async login(req, res) {
-    try {
-      const { correo, contrasena } = req.body;
-
-      // Validación de seguridad por si envían campos vacíos
-      if (!correo || !contrasena) {
-        return res.status(400).json({ error: 'Faltan datos' });
-      }
-
-      const usuario = await usuarioRepository.loginUsuario(correo, contrasena);
-      
-      // 💡 MODIFICADO: Mandamos el ID y también el ROL extraído de Supabase para guardarlo en el localStorage
-      return res.status(200).json({ 
-        mensaje: 'Login exitoso', 
-        usuarioId: usuario.id,
-        rol: usuario.rol // 👈 Retornamos el rol real de la Base de Datos
-      });
-
-    } catch (error) {
-      // Capturamos si es "El usuario no existe" o "Contraseña incorrecta"
-      return res.status(401).json({ error: error.message });
-    }
-  }
-
-  // === HU4: CONSULTAR PERFIL ===
-  static async consultarPerfil(req, res) {
+  // === HU5: CONSULTAR DETALLE DE JUEGO POR ID ===
+  static async obtenerPorId(req, res) {
     try {
       const { id } = req.params;
-      
-      const usuario = await usuarioRepository.consultarPerfil(id); 
+      const juego = await juegoRepository.obtenerPorId(id);
 
-      if (!usuario) {
-        return res.status(404).json({ error: 'Usuario no encontrado' });
+      if (!juego) {
+        return res.status(404).json({ error: "Juego no encontrado" });
       }
 
-      
-      return res.status(200).json(usuario);
-
+      return res.status(200).json(juego);
     } catch (error) {
-      return res.status(500).json({ error: "Error en el servidor al consultar perfil." });
+      return res.status(500).json({ error: "Error en el servidor al buscar el juego." });
     }
   }
 }

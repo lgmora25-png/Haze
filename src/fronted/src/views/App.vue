@@ -1,22 +1,52 @@
 <template>
   <div id="app">
+    <!-- Barra de Navegación Superior Estilo Itch.io -->
     <nav class="itch-navbar">
-      <router-link to="/" class="logo-link">
+      <div class="logo-link" @click="irAPantalla('/')">
         <div class="logo">HAZE</div>
-      </router-link>
+      </div>
 
       <div class="nav-links">
-        <router-link to="/" class="nav-btn" active-class="active">Explorar</router-link>
-        <router-link to="/subir" class="nav-btn" active-class="active">➕ Subir Juego</router-link>
-        
-        <router-link v-if="!estaLogueado" to="/registro" class="nav-btn" active-class="active">Registrarse</router-link>
-        
-        <router-link v-else to="/perfil" class="nav-btn profile-circle" active-class="active">
-          <div class="avatar-circle">👤</div>
+        <router-link to="/" class="nav-btn" :class="{ active: route.path === '/' }">Explorar</router-link>
+
+        <router-link
+          v-if="!estaLogueado"
+          to="/registro"
+          class="nav-btn"
+          :class="{ active: route.path === '/registro' }"
+        >
+          Registrarse
         </router-link>
+
+        <router-link
+          v-if="!estaLogueado"
+          to="/login"
+          class="nav-btn"
+          :class="{ active: route.path === '/login' }"
+        >
+          Iniciar Sesión
+        </router-link>
+
+        <router-link
+          v-if="estaLogueado"
+          to="/perfil"
+          class="nav-btn"
+          :class="{ active: route.path === '/perfil' }"
+        >
+          Mi Perfil
+        </router-link>
+
+        <button
+          v-if="estaLogueado"
+          class="nav-btn"
+          @click="cerrarSesion"
+        >
+          Cerrar Sesión
+        </button>
       </div>
     </nav>
 
+    <!-- Router principal de tu SPA -->
     <main class="main-content">
       <router-view />
     </main>
@@ -24,35 +54,54 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
+// Estados reactivos de navegación (Controlador)
+const router = useRouter();
 const route = useRoute();
-const estaLogueado = ref(false);
 
-// Esta función "observa" cada vez que cambias de página.
-// Si detecta que existe el 'usuario_id' en la memoria, muestra el perfil.
-// Si no, muestra el botón de registrarse.
-watch(route, () => {
-  try {
-    estaLogueado.value = !!localStorage.getItem('usuario_id');
-  } catch (e) {
-    estaLogueado.value = false;
-  }
-}, { immediate: true });
+const usuarioId = ref(localStorage.getItem('usuarioId') || '');
+const rol = ref(localStorage.getItem('rol') || '');
+const estaLogueado = computed(() => Boolean(usuarioId.value));
+
+const actualizarSesion = () => {
+  usuarioId.value = localStorage.getItem('usuarioId') || '';
+  rol.value = localStorage.getItem('rol') || '';
+};
+
+onMounted(actualizarSesion);
+watch(() => route.path, actualizarSesion);
+
+/**
+ * Función Orquestadora de Navegación
+ */
+const cerrarSesion = () => {
+  localStorage.removeItem('usuarioId');
+  localStorage.removeItem('rol');
+  usuarioId.value = '';
+  rol.value = '';
+  router.push('/');
+};
+
+const irAPantalla = (path) => {
+  router.push(path);
+};
 </script>
 
 <style>
+/* Estilos Base Globales */
 body {
   margin: 0;
   padding: 0;
-  background-color: #121212; /* El negro de fondo de pantalla completa */
-  color: #ffffff; /* Letras blancas por defecto */
+  background-color: #121212;
+  color: #ffffff;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 </style>
 
 <style scoped>
+/* Estilos del Contenedor de la Navbar */
 .itch-navbar {
   display: flex;
   justify-content: space-between;
@@ -63,23 +112,24 @@ body {
 }
 
 .logo-link {
-  text-decoration: none; 
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .logo {
   font-size: 1.8rem;
   font-weight: 900;
   color: #fff;
-  cursor: pointer;
   letter-spacing: 2px;
 }
 
 .nav-links {
   display: flex;
   gap: 15px;
-  align-items: center; /* Centra los botones y el círculo verticalmente */
+  align-items: center;
 }
 
+/* Transformamos los antiguos enlaces en botones limpios */
 .nav-btn {
   background: transparent;
   border: none;
@@ -88,46 +138,22 @@ body {
   font-weight: 600;
   cursor: pointer;
   padding: 8px 12px;
-  text-decoration: none; 
-  transition: color 0.3s ease;
+  border-radius: 4px;
+  transition: all 0.3s ease;
 }
 
 .nav-btn:hover {
   color: #fff;
+  background-color: #252525;
 }
 
-/* El Vue Router aplica automáticamente esta clase cuando estás en esa ruta */
+/* Clase activa reactiva cuando coincide con la pantalla actual */
 .nav-btn.active {
   color: #da5b5b;
-}
-
-/* Estilos especiales para el circulito del perfil */
-.profile-circle {
-  padding: 0;
-}
-
-.avatar-circle {
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  background-color: #333;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.2rem;
-  border: 2px solid transparent;
-  transition: border-color 0.3s ease;
-}
-
-.nav-btn.active .avatar-circle {
-  border-color: #da5b5b; /* Se ilumina el borde si estás en tu perfil */
-}
-
-.avatar-circle:hover {
-  border-color: #fff;
+  background-color: #2a1b1b;
 }
 
 .main-content {
-  padding-top: 20px;
+  padding: 20px 40px;
 }
 </style>

@@ -8,8 +8,12 @@ const juegos = ref([])
 const cargando = ref(true)
 const mensajeError = ref('')
 const textoBusqueda = ref('')
+const esDueno = ref(false)
+const menuAbierto = ref(false)
 
 onMounted(async () => {
+  const rolUsuario = localStorage.getItem('rol')
+  esDueno.value = rolUsuario === 'dueno'
   try {
     console.log("Intentando conectar con: http://localhost:3000/api/juegos");
     const res = await fetch('http://localhost:3000/api/juegos')
@@ -35,6 +39,18 @@ const juegosFiltrados = computed(() => {
   )
 })
 
+const toggleMenu = () => {
+  menuAbierto.value = !menuAbierto.value
+}
+
+const gestionarPago = () => {
+  alert('Espacio reservado para tu compañero: Gestión de pagos')
+}
+
+const irASubir = () => {
+  router.push('/subir')
+}
+
 // Navegamos a la ruta de detalle usando el ID del juego
 const irADetalle = (juego) => {
   const id = juego.juego_id || juego.id
@@ -45,6 +61,13 @@ const irADetalle = (juego) => {
 
 <template>
   <div class="catalog-page">
+    <div v-if="esDueno" class="admin-container">
+      <button @click="toggleMenu" class="gear-btn">⚙️ Configuración</button>
+      <div v-if="menuAbierto" class="admin-dropdown">
+        <button @click="irASubir" class="dropdown-item">➕ Add Game</button>
+        <button @click="gestionarPago" class="dropdown-item">💳 Gestionar Pago</button>
+      </div>
+    </div>
     <header class="catalog-header">
       <h1>Explora HAZE</h1>
       <input 
@@ -104,4 +127,60 @@ const irADetalle = (juego) => {
 .loader { text-align: center; color: #aaa; margin-top: 50px; }
 .error-message { text-align: center; color: #da5b5b; margin-top: 50px; font-weight: bold; }
 .empty-state { text-align: center; color: #888; margin-top: 50px; }
+
+.admin-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.gear-btn {
+  background: #2b2b2b;
+  color: #fff;
+  border: 1px solid #444;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.25s ease;
+}
+
+.gear-btn:hover {
+  border-color: #da5b5b;
+  box-shadow: 0 0 14px rgba(218, 91, 91, 0.3);
+}
+
+.admin-dropdown {
+  margin-top: 10px;
+  min-width: 180px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}
+
+.dropdown-item {
+  background: transparent;
+  color: #ccc;
+  border: none;
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background: #da5b5b;
+  color: #fff;
+}
 </style>

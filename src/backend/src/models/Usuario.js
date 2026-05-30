@@ -1,11 +1,12 @@
 // src/models/Usuario.js
 
 export class Usuario {
-  constructor({ id = null, nombre_usuario, correo, contrasena }) {
+  constructor({ id = null, nombre_usuario, correo, contrasena, rol = 'usuario' }) {
     this.id = id;
     this.nombre_usuario = nombre_usuario;
     this.correo = correo;
     this.contrasena = contrasena;
+    this.rol = rol;
   }
 
   // === HISTORIA DE USUARIO 3 (Registrar Perfil) ===
