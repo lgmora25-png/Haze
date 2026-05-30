@@ -1,4 +1,4 @@
-<script setup>
+<script setup> // Importamos las funciones necesarias de Vue y Vue Router
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
