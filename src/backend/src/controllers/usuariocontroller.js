@@ -1,5 +1,3 @@
-// src/controllers/usuarioController.js
-
 import { Usuario } from '../models/Usuario.js';
 import { UsuarioRepository } from '../repositories/UsuarioRepository.js';
 

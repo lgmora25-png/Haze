@@ -83,7 +83,6 @@ const irADetalle = (juego) => {
     <header class="catalog-header">
       <div class="header-left">
         <h1>Explora HAZE</h1>
-        <router-link v-if="esDueno" to="/subir" class="upload-btn">➕ Subir Juego</router-link>
       </div>
       <input 
         v-model="textoBusqueda" 

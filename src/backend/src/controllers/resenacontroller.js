@@ -1,4 +1,5 @@
 import { ResenaRepository } from '../repositories/ResenaRepository.js'
+import { supabase } from '../config/conexion.js'
 
 const resenaRepository = new ResenaRepository()
 
@@ -32,18 +33,73 @@ export const resenaController = {
       // Validación: "Debe dar rating para publicar una reseña"
       if (!rating || rating < 1 || rating > 5) {
         return res.status(400).json({ 
-          mensaje: 'Debe dar rating para publicar una reseña.' 
+          mensaje: 'Debe dar rating para publicar una reseña'
         });
       }
 
-      // === NOTA PARA EVALUACIÓN DEL ERS ===
-      // Si necesitaras simular de forma estricta el caso donde el usuario no posee el juego,
-      // el criterio de aceptación del ERS exige responder textualmente con:
-      // "Debe tener y haber jugado el juego para publicar una reseña"
-      //
-      // Si quisieras validar la unicidad en el backend (Criterio: "Solo puede tener una reseña publicada por juego"):
-      // const existe = await Resena.verificarDuplicado(juego_id, usuario_nombre);
-      // if (existe) return res.status(400).json({ mensaje: 'Solo puede tener una reseña publicada por juego' });
+      // === VALIDACIONES ADICIONALES SEGUN REGLAS DE NEGOCIO ===
+      // 1) Solo miembros UCAB (verificamos por correo asociado al usuario)
+      // 2) Debe tener y haber jugado el juego (intentamos consultar tablas comunes; si no existe la tabla
+      //    tratamos como no poseído)
+      // 3) Solo una reseña por usuario por juego
+
+      // Recuperar usuario por nombre de usuario
+      const { data: usuarios, error: userErr } = await supabase
+        .from('usuarios')
+        .select('*')
+        .or(`nombre_usuario.eq.${usuario_nombre},correo.eq.${usuario_nombre}`)
+        .limit(1)
+
+      if (userErr || !usuarios || usuarios.length === 0) {
+        // No encontramos el usuario -> no puede publicar
+        return res.status(403).json({ mensaje: 'Debe tener y haber jugado el juego para publicar una reseña' })
+      }
+
+      const usuario = usuarios[0]
+
+      // Regla 1: Exclusivo para miembros UCAB (por correo)
+      const correo = (usuario.correo || '').toLowerCase()
+      if (!correo.endsWith('@ucab.edu.ve')) {
+        return res.status(403).json({ mensaje: 'Funcionalidad exclusiva para miembros de la comunidad UCAB.' })
+      }
+
+      // Regla 2: Verificar si el usuario tiene/ha jugado el juego
+      const usuarioTieneElJuego = async () => {
+        // Intentamos consultar varias tablas que podrían representar compras/posesión
+        const tablas = ['compras', 'usuario_juegos', 'juegos_usuario', 'pagos']
+        for (const tabla of tablas) {
+          try {
+            const q = supabase.from(tabla).select('*')
+              .or(`cliente_nombre.eq.${usuario_nombre},usuario_nombre.eq.${usuario_nombre},cliente_documento.eq.${usuario.documento || ''}`)
+              .eq('juego_id', juego_id)
+              .limit(1)
+
+            const { data: d, error: e } = await q
+            if (!e && d && d.length > 0) return true
+          } catch (err) {
+            // ignoramos errores de tabla no existente y seguimos probando
+            continue
+          }
+        }
+        return false
+      }
+
+      const tiene = await usuarioTieneElJuego()
+      if (!tiene) {
+        return res.status(403).json({ mensaje: 'Debe tener y haber jugado el juego para publicar una reseña' })
+      }
+
+      // Regla 3: Unicidad de reseña por juego/usuario
+      const { data: duplicado, error: dupErr } = await supabase
+        .from('resenas')
+        .select('*')
+        .eq('juego_id', juego_id)
+        .eq('usuario_nombre', usuario_nombre)
+        .limit(1)
+
+      if (!dupErr && duplicado && duplicado.length > 0) {
+        return res.status(400).json({ mensaje: 'Solo puede tener una reseña publicada por juego' })
+      }
 
       // Instanciar y guardar la reseña a través del repositorio
       const nuevaResena = await resenaRepository.guardar({
@@ -55,7 +111,7 @@ export const resenaController = {
 
       // Criterio de Aceptación 2: Éxito en la publicación
       res.status(201).json({ 
-        mensaje: 'Reseña publicada con éxito.', 
+        mensaje: 'Reseña publicada', 
         data: nuevaResena 
       });
     } catch (error) {

@@ -11,24 +11,6 @@
 
         <!-- Botón visible solo para dueños -->
         <router-link
-          v-if="rol === 'dueno'"
-          to="/pagos/manage"
-          class="nav-btn"
-          :class="{ active: route.path.startsWith('/pagos') }"
-        >
-          Pagos
-        </router-link>
-
-        <router-link
-          v-if="rol === 'dueno'"
-          to="/admin"
-          class="nav-btn"
-          :class="{ active: route.path === '/admin' }"
-        >
-          Admin
-        </router-link>
-
-        <router-link
           v-if="!estaLogueado"
           to="/registro"
           class="nav-btn"
