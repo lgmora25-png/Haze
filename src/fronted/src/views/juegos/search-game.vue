@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -30,6 +30,17 @@ onMounted(async () => {
   } finally {
     cargando.value = false
   }
+})
+
+// Actualizamos cuando la sesión cambia en otros componentes (login/logout)
+const handleSessionUpdated = () => {
+  const rolUsuario = localStorage.getItem('rol')
+  esDueno.value = rolUsuario === 'dueno'
+}
+
+window.addEventListener('session-updated', handleSessionUpdated)
+onBeforeUnmount(() => {
+  window.removeEventListener('session-updated', handleSessionUpdated)
 })
 
 const juegosFiltrados = computed(() => {
@@ -68,8 +79,12 @@ const irADetalle = (juego) => {
         <button @click="gestionarPago" class="dropdown-item">💳 Gestionar Pago</button>
       </div>
     </div>
+
     <header class="catalog-header">
-      <h1>Explora HAZE</h1>
+      <div class="header-left">
+        <h1>Explora HAZE</h1>
+        <router-link v-if="esDueno" to="/subir" class="upload-btn">➕ Subir Juego</router-link>
+      </div>
       <input 
         v-model="textoBusqueda" 
         type="text" 
@@ -108,8 +123,11 @@ const irADetalle = (juego) => {
 
 <style scoped>
 .catalog-page { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
-.catalog-header { margin-bottom: 40px; text-align: center; }
-.search-bar { width: 100%; max-width: 500px; padding: 12px 20px; border-radius: 25px; border: 1px solid #444; background: #1a1a1a; color: white; margin-top: 15px; }
+.catalog-header { margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.catalog-header .header-left { display: flex; align-items: center; gap: 12px; }
+.upload-btn { background: #2b2b2b; color: #fff; padding: 8px 12px; border-radius: 8px; text-decoration: none; border: 1px solid #444; font-weight: 700; }
+.upload-btn:hover { border-color: #da5b5b; }
+.search-bar { width: 100%; max-width: 420px; padding: 12px 20px; border-radius: 25px; border: 1px solid #444; background: #1a1a1a; color: white; margin-top: 0; }
 .search-bar:focus { outline: 1px solid #da5b5b; }
 
 .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 30px; }

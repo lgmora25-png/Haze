@@ -8,6 +8,7 @@ import InfoGame from '../juegos/info-game.vue'
 import Register from '../Registro/register.vue'
 import Profile from '../Registro/profile.vue'
 import Login from '../Registro/login.vue'
+import AdminMenu from '../usuario/admin-menu.vue'
 
 const routes = [
   {
@@ -18,7 +19,14 @@ const routes = [
   {
     path: '/subir',
     name: 'subir-juego',
-    component: AddGame
+    component: AddGame,
+    meta: { requiresOwner: true }
+  },
+  {
+    path: '/admin',
+    name: 'admin-menu',
+    component: AdminMenu,
+    meta: { requiresOwner: true }
   },
   {
     // Usamos :id dinámico para saber qué juego abrir
@@ -49,6 +57,20 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+// Route guard: bloquea rutas marcadas con `requiresOwner` si el rol no es `dueno`
+router.beforeEach((to, from, next) => {
+  if (to.meta && to.meta.requiresOwner) {
+    const rol = localStorage.getItem('rol')
+    if (rol === 'dueno') {
+      return next()
+    }
+    // Mensaje simple y redirección al catálogo
+    window.alert('Acceso denegado: necesitas ser dueño para subir juegos.')
+    return next({ name: 'explorar' })
+  }
+  return next()
 })
 
 export default router

@@ -45,8 +45,8 @@ const mensajeError = ref('');
 
 // === HISTORIA DE USUARIO 4: Consultar Perfil (Frontend) ===
 onMounted(async () => {
-  // Ahora solo leemos el ID real que guardó el Login, sin "1" de prueba
-  const sesionActivaId = localStorage.getItem('usuario_id'); 
+  // Ahora solo leemos el ID real que guardó el Login (clave `usuarioId`)
+  const sesionActivaId = localStorage.getItem('usuarioId');
 
   if (!sesionActivaId) {
     // Si entra directo a /perfil sin loguearse, lo mandamos al registro
@@ -74,7 +74,8 @@ onMounted(async () => {
 
       // Si el backend responde 404 (perfil no existe), limpiamos sesión y redirigimos
       if (res.status === 404 || data?.error === 'Perfil no encontrado') {
-        localStorage.removeItem('usuario_id');
+        localStorage.removeItem('usuarioId');
+        localStorage.removeItem('rol');
         router.push('/registro');
       }
     } else {
@@ -86,7 +87,8 @@ onMounted(async () => {
 });
 
 const cerrarSesion = () => {
-  localStorage.removeItem('usuario_id');
+  localStorage.removeItem('usuarioId');
+  localStorage.removeItem('rol');
   router.push('/registro');
 };
 </script>

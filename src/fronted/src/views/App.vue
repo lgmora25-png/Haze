@@ -12,11 +12,11 @@
         <!-- Botón visible solo para dueños -->
         <router-link
           v-if="rol === 'dueno'"
-          to="/subir"
+          to="/admin"
           class="nav-btn"
-          :class="{ active: route.path === '/subir' }"
+          :class="{ active: route.path === '/admin' }"
         >
-          ⚙️ Subir Juego
+          Admin
         </router-link>
 
         <router-link
@@ -66,46 +66,63 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { onBeforeUnmount } from 'vue';
 
 // Estados reactivos de navegación (Controlador)
 const router = useRouter();
 const route = useRoute();
 
 const usuarioId = ref(localStorage.getItem('usuarioId') || '');
+const usuarioNombre = ref(localStorage.getItem('usuarioNombre') || '');
 const rol = ref(localStorage.getItem('rol') || '');
 const estaLogueado = computed(() => Boolean(usuarioId.value));
 
 const actualizarSesion = async () => {
   usuarioId.value = localStorage.getItem('usuarioId') || '';
+  usuarioNombre.value = localStorage.getItem('usuarioNombre') || '';
   rol.value = localStorage.getItem('rol') || '';
 
-  // Si tenemos usuarioId pero no tenemos rol, intentamos recuperarlo desde el backend
-  if (usuarioId.value && !rol.value) {
+  // Si existe usuarioId pero falta info, intentamos recuperarla del backend
+    if (usuarioId.value && (!rol.value || !usuarioNombre.value)) {
     try {
-      const res = await fetch(`http://localhost:3000/api/usuarios/${usuarioId.value}`);
+      const res = await fetch(`http://localhost:3000/api/usuarios/perfil/${usuarioId.value}`);
       if (res.ok) {
         const data = await res.json();
         const fetchedRol = data.rol || (data.data && data.data.rol) || 'usuario';
+        const fetchedNombre = data.nombre_usuario || (data.data && data.data.nombre_usuario) || '';
+
         rol.value = fetchedRol;
+        usuarioNombre.value = fetchedNombre;
+
         localStorage.setItem('rol', fetchedRol);
+        if (fetchedNombre) {
+          localStorage.setItem('usuarioNombre', fetchedNombre);
+        }
       }
     } catch (err) {
-      // No bloqueamos la UI por esto; solo lo logueamos para depuración
-      console.error('No se pudo obtener el rol desde el perfil:', err);
+      console.error('No se pudo obtener la sesión completa desde el perfil:', err);
     }
   }
 };
 
 onMounted(() => { actualizarSesion(); });
 watch(() => route.path, actualizarSesion);
+// Listener para eventos de sesión (login/logout desde componentes)
+const handleSessionUpdated = () => actualizarSesion();
+window.addEventListener('session-updated', handleSessionUpdated);
+onBeforeUnmount(() => {
+  window.removeEventListener('session-updated', handleSessionUpdated);
+});
 
 /**
  * Función Orquestadora de Navegación
  */
 const cerrarSesion = () => {
   localStorage.removeItem('usuarioId');
+  localStorage.removeItem('usuarioNombre');
   localStorage.removeItem('rol');
   usuarioId.value = '';
+  usuarioNombre.value = '';
   rol.value = '';
   router.push('/');
 };

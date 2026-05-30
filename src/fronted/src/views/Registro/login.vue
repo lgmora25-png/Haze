@@ -65,7 +65,11 @@ const iniciarSesion = async () => {
 
     // 💾 GUARDADO EN LOCALSTORAGE
     localStorage.setItem('usuarioId', data.usuarioId);
+    localStorage.setItem('usuarioNombre', data.usuarioNombre || '');
     localStorage.setItem('rol', data.rol); // 👈 ¡Línea agregada! Guardará 'dueno' o 'usuario'
+
+    // Disparamos un evento personalizado para notificar al resto de la app
+    window.dispatchEvent(new CustomEvent('session-updated'));
 
     mensajeExito.value = data.mensaje || '¡Bienvenido de nuevo!';
     

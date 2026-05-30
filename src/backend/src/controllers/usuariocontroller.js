@@ -50,10 +50,11 @@ export class UsuarioController {
         rolAsignado = 'dueno';
       }
       
-      // Si pasa, mandamos el ID y también el ROL para guardarlo en el localStorage del frontend
+      // Si pasa, mandamos el ID, el ROL y el nombre de usuario para guardarlo en el frontend
       return res.status(200).json({ 
         mensaje: 'Login exitoso', 
         usuarioId: usuario.id,
+        usuarioNombre: usuario.nombre_usuario,
         rol: rolAsignado
       });
 
