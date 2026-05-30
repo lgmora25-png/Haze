@@ -2,7 +2,7 @@
 
 import { supabase } from '../config/conexion.js'; 
 import { Usuario } from '../models/Usuario.js';
-import bcrypt from 'bcrypt';
+// Eliminamos la importación de bcrypt
 
 export class UsuarioRepository {
   
@@ -23,16 +23,13 @@ export class UsuarioRepository {
       throw new Error("El usuario ya existe");
     }
 
-    // Hasheamos la contraseña antes de almacenarla (bcrypt con salt rounds = 10)
-    const saltRounds = 10;
-    const hashed = await bcrypt.hash(usuarioInstancia.contrasena, saltRounds);
-
+    // Insertamos directamente la contraseña en texto plano
     const { data, error } = await supabase
       .from('usuarios')
       .insert([{
         nombre_usuario: usuarioInstancia.nombre_usuario,
         correo: usuarioInstancia.correo,
-        contrasena: hashed
+        contrasena: usuarioInstancia.contrasena 
       }])
       .select();
 
@@ -57,9 +54,8 @@ export class UsuarioRepository {
       throw new Error('El usuario no existe');
     }
 
-    // 2. Comparamos la contraseña plana con el hash almacenado usando bcrypt
-    const match = await bcrypt.compare(contrasenaPlana, usuario.contrasena);
-    if (!match) {
+    // 2. Comparamos las contraseñas directamente (Texto plano contra texto plano)
+    if (usuario.contrasena !== contrasenaPlana) {
       throw new Error('Contraseña incorrecta');
     }
 
@@ -80,19 +76,5 @@ export class UsuarioRepository {
     }
 
     return new Usuario(data);
-  }
-
-  async verificarContrasena(id, contrasenaPlana) {
-    const { data, error } = await supabase
-      .from('usuarios')
-      .select('contrasena')
-      .eq('id', id)
-      .single();
-
-    if (error || !data) {
-      throw new Error('Usuario no encontrado');
-    }
-
-    return bcrypt.compare(contrasenaPlana, data.contrasena);
   }
 }
