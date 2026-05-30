@@ -9,6 +9,16 @@
       <div class="nav-links">
         <router-link to="/" class="nav-btn" :class="{ active: route.path === '/' }">Explorar</router-link>
 
+        <!-- Botón visible solo para dueños -->
+        <router-link
+          v-if="rol === 'dueno'"
+          to="/subir"
+          class="nav-btn"
+          :class="{ active: route.path === '/subir' }"
+        >
+          ⚙️ Subir Juego
+        </router-link>
+
         <router-link
           v-if="!estaLogueado"
           to="/registro"
@@ -65,12 +75,28 @@ const usuarioId = ref(localStorage.getItem('usuarioId') || '');
 const rol = ref(localStorage.getItem('rol') || '');
 const estaLogueado = computed(() => Boolean(usuarioId.value));
 
-const actualizarSesion = () => {
+const actualizarSesion = async () => {
   usuarioId.value = localStorage.getItem('usuarioId') || '';
   rol.value = localStorage.getItem('rol') || '';
+
+  // Si tenemos usuarioId pero no tenemos rol, intentamos recuperarlo desde el backend
+  if (usuarioId.value && !rol.value) {
+    try {
+      const res = await fetch(`http://localhost:3000/api/usuarios/${usuarioId.value}`);
+      if (res.ok) {
+        const data = await res.json();
+        const fetchedRol = data.rol || (data.data && data.data.rol) || 'usuario';
+        rol.value = fetchedRol;
+        localStorage.setItem('rol', fetchedRol);
+      }
+    } catch (err) {
+      // No bloqueamos la UI por esto; solo lo logueamos para depuración
+      console.error('No se pudo obtener el rol desde el perfil:', err);
+    }
+  }
 };
 
-onMounted(actualizarSesion);
+onMounted(() => { actualizarSesion(); });
 watch(() => route.path, actualizarSesion);
 
 /**
