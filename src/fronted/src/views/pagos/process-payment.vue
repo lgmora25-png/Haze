@@ -4,30 +4,34 @@
 
     <form @submit.prevent="confirmar">
       <div>
-        <label>ID del pago</label>
-        <input v-model="id" placeholder="Escribe el id del pago" />
+        <label>Referencia de pago (pago_ref)</label>
+        <input v-model="id" @blur="loadPago" :disabled="loading" placeholder="Escribe la referencia del pago (pago_ref)" />
+        <div v-if="errorId" class="field-error">{{ errorId }}</div>
       </div>
 
       <div>
         <label>Documento del cliente</label>
-        <input v-model="cliente_documento" placeholder="Documento" />
+        <input v-model="cliente_documento" :disabled="loading" placeholder="Documento" />
+        <div v-if="errorDoc" class="field-error">{{ errorDoc }}</div>
       </div>
 
       <div>
         <label>Nombre del cliente</label>
-        <input v-model="cliente_nombre" placeholder="Nombre" />
+        <input v-model="cliente_nombre" :disabled="loading" placeholder="Nombre" />
+        <div v-if="errorNombre" class="field-error">{{ errorNombre }}</div>
       </div>
 
       <div>
         <label>Teléfono</label>
-        <input v-model="telefono" placeholder="Teléfono" />
+        <input v-model="telefono" :disabled="loading" placeholder="Teléfono" />
+        <div v-if="errorTelefono" class="field-error">{{ errorTelefono }}</div>
       </div>
 
       <p v-if="error" class="error">{{ error }}</p>
 
       <div class="buttons">
-        <button type="button" @click="cancelar">Cancelar</button>
-        <button type="submit">Confirmar</button>
+        <button type="button" @click="cancelar" :disabled="loading">Cancelar</button>
+        <button type="submit" :disabled="loading">Confirmar</button>
       </div>
     </form>
 
@@ -49,6 +53,42 @@ const telefono = ref('')
 const error = ref('')
 const mensaje = ref('')
 
+const errorId = ref('')
+const errorDoc = ref('')
+const errorNombre = ref('')
+const errorTelefono = ref('')
+const loading = ref(false)
+
+// Carga optimizada: intenta obtener los datos del pago por ID para prellenar campos
+const loadPago = async () => {
+  error.value = ''
+  errorId.value = ''
+  if (!id.value) return
+
+    loading.value = true
+  try {
+    const res = await fetch(`http://localhost:3000/api/pagos/${encodeURIComponent(id.value)}`)
+    if (res.ok) {
+      const data = await res.json()
+      cliente_documento.value = data.cliente_documento || cliente_documento.value
+      cliente_nombre.value = data.cliente_nombre || cliente_nombre.value
+      telefono.value = data.telefono || telefono.value
+        mensaje.value = 'Pago encontrado.'
+    } else {
+      const data = await res.json().catch(() => ({}))
+      if (res.status === 404) {
+        errorId.value = data.mensaje || 'Pago no encontrado.'
+      } else {
+        error.value = data.error || data.mensaje || 'Error al cargar el pago.'
+      }
+    }
+  } catch (err) {
+    error.value = err.message || 'Error de conexión.'
+  } finally {
+    loading.value = false
+  }
+}
+
 const cancelar = () => {
   mensaje.value = ''
   error.value = ''
@@ -56,14 +96,20 @@ const cancelar = () => {
 }
 
 const confirmar = async () => {
+  // Reset field errors
   error.value = ''
+  errorId.value = ''
+  errorDoc.value = ''
+  errorNombre.value = ''
+  errorTelefono.value = ''
   mensaje.value = ''
 
   if (!id.value) {
-    error.value = 'Debe ingresar el id del pago.'
+    errorId.value = 'Debe ingresar el id del pago.'
     return
   }
 
+  loading.value = true
   try {
     const res = await fetch('http://localhost:3000/api/pagos/process', {
       method: 'POST',
@@ -77,14 +123,31 @@ const confirmar = async () => {
       })
     })
 
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.mensaje || data.error || 'Error procesando pago')
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      // Map server messages to inline field errors when possible
+      const msg = (data.mensaje || data.error || '').toLowerCase()
+      if (msg.includes('documento')) {
+        errorDoc.value = data.mensaje || data.error
+      } else if (msg.includes('pago no encontrado') || msg.includes('no encontrado')) {
+        errorId.value = data.mensaje || data.error
+      } else if (msg.includes('se requiere') && msg.includes('id')) {
+        errorId.value = data.mensaje || data.error
+      } else {
+        error.value = data.mensaje || data.error || 'Error procesando pago.'
+      }
+      return
+    }
 
     mensaje.value = data.mensaje || 'Pago procesado con éxito.'
-    // Tras confirmar éxito, esperar confirmación del empleado para volver
-    setTimeout(() => router.push('/pagos/manage'), 1200)
+    // Mostrar confirmación al empleado y redirigir solo al aceptar
+    if (confirm(mensaje.value + '\n\nPresiona OK para volver a la gestión de pagos.')) {
+      router.push('/pagos/manage')
+    }
   } catch (err) {
     error.value = err.message || 'Error inesperado.'
+  } finally {
+    loading.value = false
   }
 }
 </script>

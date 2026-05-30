@@ -5,7 +5,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
+// Use service role key for server operations when available, fall back to anon
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
 // Control de calidad: Verificar que las credenciales no lleguen vacías
 if (!supabaseUrl || !supabaseKey) {

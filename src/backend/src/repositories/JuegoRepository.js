@@ -29,7 +29,7 @@ export class JuegoRepository {
     try {
       const { data: tituloExistente, error: tituloError } = await supabase
         .from('juegos')
-        .select('juego_id')
+        .select('id')
         .ilike('titulo', tituloNormalizado)
         .limit(1);
 
@@ -47,7 +47,7 @@ export class JuegoRepository {
     try {
       const { data: imagenExistente, error: imagenError } = await supabase
         .from('juegos')
-        .select('juego_id')
+        .select('id')
         .eq('imagen_url', imagenUrl)
         .limit(1);
 

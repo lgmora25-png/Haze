@@ -19,16 +19,20 @@ export class PagoRepository {
   }
 
   async obtenerPorId(id) {
-    const candidateKeys = ['pago_id', 'id']
+    const candidateKeys = ['pago_ref', 'pago_id', 'id']
 
     for (const key of candidateKeys) {
+      console.log(`PagoRepository: buscando pago por ${key} = ${id}`)
       const { data, error } = await supabase.from('pagos').select('*').eq(key, id).single()
       if (error) {
         const msg = String(error.message || '').toLowerCase()
-        if (msg.includes('column') || msg.includes('unknown') || error.code === 'PGRST116') continue
+        console.log(`PagoRepository: error buscando por ${key}:`, error.message)
+        // Ignorar errores que provengan de tipo de dato (uuid invalid sintax) o columna desconocida
+        if (msg.includes('column') || msg.includes('unknown') || msg.includes('invalid input syntax') || error.code === 'PGRST116') continue
         throw new Error(`Error al obtener pago por id: ${error.message}`)
       }
 
+      console.log(`PagoRepository: encontrado por ${key}:`, data ? 'sí' : 'no')
       return new Pago(data)
     }
 
@@ -50,5 +54,19 @@ export class PagoRepository {
     if (error) throw new Error(`Error al procesar pago: ${error.message}`)
 
     return new Pago(data[0])
+  }
+
+  async buscarPorRef(ref) {
+    try {
+      const { data, error } = await supabase.from('pagos').select('*').ilike('pago_ref', ref).limit(1).single()
+      if (error) {
+        const msg = String(error.message || '').toLowerCase()
+        if (msg.includes('column') || msg.includes('unknown') || msg.includes('invalid input syntax') || error.code === 'PGRST116') return null
+        throw new Error(`Error al buscar pago por ref: ${error.message}`)
+      }
+      return data ? new Pago(data) : null
+    } catch (err) {
+      throw err
+    }
   }
 }

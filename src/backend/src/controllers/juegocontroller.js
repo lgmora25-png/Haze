@@ -37,7 +37,8 @@ export class JuegoController {
       });
 
     } catch (error) {
-      if (error.message === "El juego ya existe") {
+      console.error('Error al crear juego:', error);
+      if (String(error.message).toLowerCase().includes('duplic')) {
         return res.status(409).json({ error: error.message });
       }
       return res.status(500).json({ error: "Error interno en el servidor al guardar el juego." });

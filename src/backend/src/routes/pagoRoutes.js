@@ -10,6 +10,9 @@ router.post('/consultar', pagoController.consultar)
 router.post('/process', pagoController.procesarPago)
 
 // Obtener pago por id
+// Obtener pago por referencia primero
+router.get('/ref/:ref', pagoController.obtenerPorRef)
+// Obtener pago por id
 router.get('/:id', pagoController.obtenerPorId)
 
 export default router
