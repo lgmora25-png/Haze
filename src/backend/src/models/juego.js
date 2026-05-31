@@ -9,6 +9,7 @@ export class Juego {
     this.imagen_url = imagen_url;     // String: Enlace de la portada (.png, .svg, etc.)
   }
 
+  // Regla de Negocio (POO): Formatear el precio para la Vista
   obtenerPrecioFormateado() {
     return this.precio === 0 ? 'Gratis' : `$${this.precio.toFixed(2)}`;
   }

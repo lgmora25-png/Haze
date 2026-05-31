@@ -33,18 +33,6 @@ export const pagoController = {
     }
   },
 
-  obtenerPorRef: async (req, res) => {
-    try {
-      const { ref } = req.params
-      const pago = await pagoRepository.buscarPorRef(ref)
-      if (!pago) return res.status(404).json({ mensaje: 'Pago no encontrado por referencia.' })
-      res.json(pago)
-    } catch (error) {
-      console.error('Error en pagoController.obtenerPorRef:', error)
-      res.status(500).json({ error: error.message })
-    }
-  },
-
   // POST /api/pagos/process { id, cliente_nombre, cliente_documento, telefono, confirmar }
   procesarPago: async (req, res) => {
     try {

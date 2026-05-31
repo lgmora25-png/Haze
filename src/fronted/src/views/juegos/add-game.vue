@@ -78,8 +78,15 @@ const publicarJuego = async () => {
       alert('¡Juego publicado con éxito!')
       router.push('/') // Volvemos al catálogo
     } else {
-      const errorData = await res.json()
-      alert('Error: ' + (errorData.error || 'No se pudo publicar'))
+      let errorMessage = 'No se pudo publicar'
+      try {
+        const errorData = await res.json()
+        errorMessage = errorData.error || errorMessage
+      } catch (jsonError) {
+        const text = await res.text()
+        if (text) errorMessage = text
+      }
+      alert('Error: ' + errorMessage)
     }
   } catch (err) {
     console.error("Error en el flujo:", err)

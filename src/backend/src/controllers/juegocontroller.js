@@ -1,5 +1,6 @@
 // src/backend/controllers/juegocontroller.js
 
+import fs from 'fs';
 import { Juego } from '../models/Juego.js';
 import { JuegoRepository } from '../repositories/JuegoRepository.js';
 
@@ -37,11 +38,17 @@ export class JuegoController {
       });
 
     } catch (error) {
-      console.error('Error al crear juego:', error);
-      if (String(error.message).toLowerCase().includes('duplic')) {
+      const errorText = `[$(new Date().toISOString())] Error en JuegoController.crear: ${error.stack || error}\n`;
+      console.error(errorText);
+      try {
+        fs.appendFileSync(new URL('../../error.log', import.meta.url), errorText);
+      } catch (fsErr) {
+        console.error('No se pudo escribir error.log:', fsErr);
+      }
+      if (error.message === "El juego ya existe") {
         return res.status(409).json({ error: error.message });
       }
-      return res.status(500).json({ error: "Error interno en el servidor al guardar el juego." });
+      return res.status(500).json({ error: "Error interno en el servidor al guardar el juego.", details: error.message });
     }
   }
 

@@ -124,29 +124,12 @@ const enviarResena = async () => {
     })
 
     const responseData = await res.json()
-
-    // Manejo de mensajes específicos según las reglas de negocio
-    const msg = responseData.mensaje || responseData.error || ''
     if (!res.ok) {
-      // Mensajes que deben mostrarse como alerta y luego regresar al formulario
-      if (msg === 'Debe tener y haber jugado el juego para publicar una reseña' ||
-          msg === 'Solo puede tener una reseña publicada por juego' ||
-          msg === 'Debe dar rating para publicar una reseña') {
-        alert(msg)
-        return
-      }
-
-      throw new Error(msg || 'No se pudo enviar la reseña')
-    }
-
-    // Éxito: mostrar mensaje exacto y actualizar la lista
-    if (msg === 'Reseña publicada') {
-      alert(msg)
+      throw new Error(responseData.mensaje || responseData.error || 'No se pudo enviar la reseña')
     }
 
     const nuevaResena = responseData.data ?? responseData
-    // Refrescar reseñas desde el servidor para asegurar consistencia
-    await loadReviews()
+    reviews.value.unshift(nuevaResena)
     nuevoComentario.value = ''
     nuevoRating.value = 5
   } catch (err) {
@@ -155,14 +138,6 @@ const enviarResena = async () => {
   } finally {
     cargandoEnvio.value = false
   }
-}
-
-const cancelarResena = () => {
-  // Cancela la acción inmediatamente como pide la especificación
-  nuevoComentario.value = ''
-  nuevoRating.value = 5
-  errorMensaje.value = ''
-  alert('Acción cancelada')
 }
 
 const eliminarResena = async (id) => {
@@ -304,12 +279,9 @@ const volver = () => router.push('/')
 
             <p v-if="errorMensaje" class="form-error">{{ errorMensaje }}</p>
 
-            <div style="display:flex; gap:10px; align-items:center;">
-              <button type="button" class="btn-secondary" @click="cancelarResena">Salir</button>
-              <button type="submit" class="btn-submit" :disabled="cargandoEnvio">
-                {{ cargandoEnvio ? 'Enviando...' : 'Publicar reseña' }}
-              </button>
-            </div>
+            <button type="submit" class="btn-submit" :disabled="cargandoEnvio">
+              {{ cargandoEnvio ? 'Enviando...' : 'Publicar reseña' }}
+            </button>
           </form>
         </section>
       </main>

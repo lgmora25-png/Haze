@@ -14,19 +14,19 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json())
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 app.use('/api/juegos', juegoRoutes)
 app.use('/api/usuarios', usuarioRoutes)
 app.use('/api/resenas', resenaRoutes)
 app.use('/api/pagos', pagoRoutes)
 
-// Log registered routes (for debugging)
-try {
-  const routes = app._router && app._router.stack ? app._router.stack.filter(l=>l.route).map(l=>l.route.path) : []
-  console.log('Rutas registradas:', routes)
-} catch (e) {
-  console.error('No se pudieron listar rutas:', e.message)
-}
+app.use((err, req, res, next) => {
+  if (err && err.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'Payload demasiado grande. Usa una imagen más pequeña o ajusta el límite.' });
+  }
+  next(err);
+});
 
 const PORT = 3000
 app.listen(PORT, () => {
