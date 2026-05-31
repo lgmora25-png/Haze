@@ -2,7 +2,7 @@
 
 import { supabase } from '../config/conexion.js'; 
 import { Usuario } from '../models/Usuario.js';
-import bcrypt from 'bcrypt';
+// bcrypt eliminado — contraseñas se almacenan/gestionan en texto plano
 
 export class UsuarioRepository {
   
@@ -24,8 +24,8 @@ export class UsuarioRepository {
     }
 
     // Hasheamos la contraseña antes de almacenarla (bcrypt con salt rounds = 10)
-    const saltRounds = 10;
-    const hashed = await bcrypt.hash(usuarioInstancia.contrasena, saltRounds);
+    // Almacenamos la contraseña tal cual (texto plano) — decisión del equipo
+    const hashed = usuarioInstancia.contrasena;
 
     const { data, error } = await supabase
       .from('usuarios')
@@ -57,9 +57,8 @@ export class UsuarioRepository {
       throw new Error('El usuario no existe');
     }
 
-    // 2. Comparamos la contraseña plana con el hash almacenado usando bcrypt
-    const match = await bcrypt.compare(contrasenaPlana, usuario.contrasena);
-    if (!match) {
+    // 2. Comparamos la contraseña plana con la almacenada (texto plano)
+    if (contrasenaPlana !== usuario.contrasena) {
       throw new Error('Contraseña incorrecta');
     }
 
@@ -93,6 +92,6 @@ export class UsuarioRepository {
       throw new Error('Usuario no encontrado');
     }
 
-    return bcrypt.compare(contrasenaPlana, data.contrasena);
+    return contrasenaPlana === data.contrasena;
   }
 }
