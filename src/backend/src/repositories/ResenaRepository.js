@@ -29,6 +29,20 @@ export class ResenaRepository {
     return new Resena(data[0])
   }
 
+  async obtenerPorId(id) {
+    const { data, error } = await supabase
+      .from('resenas')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (error) {
+      throw new Error(`Error al obtener la reseña: ${error.message}`)
+    }
+
+    return data ? new Resena(data) : null
+  }
+
   async eliminar(id) {
     const { error } = await supabase
       .from('resenas')

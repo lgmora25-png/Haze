@@ -71,6 +71,20 @@ export const resenaController = {
   eliminarResena: async (req, res) => {
     try {
       const { id } = req.params;
+      const { usuario_nombre } = req.body;
+
+      if (!usuario_nombre) {
+        return res.status(401).json({ error: 'Debe iniciar sesión para eliminar reseñas.' });
+      }
+
+      const resenaExistente = await resenaRepository.obtenerPorId(id);
+      if (!resenaExistente) {
+        return res.status(404).json({ error: 'Reseña no encontrada.' });
+      }
+
+      if (resenaExistente.usuario_nombre !== usuario_nombre) {
+        return res.status(403).json({ error: 'Solo puedes eliminar tus propias reseñas.' });
+      }
 
       await resenaRepository.eliminar(id);
 

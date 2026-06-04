@@ -13,7 +13,6 @@ const juegoLocal = ref(null)
 const reviews = ref([])
 const nuevoComentario = ref('')
 const nuevoRating = ref(5)
-const nuevoUsuario = ref(localStorage.getItem('usuarioNombre') || '')
 const usuarioNombre = ref(localStorage.getItem('usuarioNombre') || '')
 const estaLogueado = ref(Boolean(localStorage.getItem('usuarioId')))
 const cargandoJuego = ref(false)
@@ -65,17 +64,22 @@ const loadReviews = async () => {
   }
 }
 
+const puedeEliminar = (review) => {
+  return estaLogueado.value && usuarioNombre.value && review.usuario_nombre === usuarioNombre.value
+}
+
 const enviarResena = async () => {
   errorMensaje.value = ''
 
-  const usuarioParaEnviar = estaLogueado.value
-    ? (usuarioNombre.value.trim() || 'Usuario registrado')
-    : nuevoUsuario.value.trim()
-
-  if (!estaLogueado.value && !usuarioParaEnviar) {
-    errorMensaje.value = 'Debes indicar tu nombre antes de enviar la reseña.'
+  if (!estaLogueado.value) {
+    const deseaLogin = confirm('Solo puedes redactar reseñas si estás logueado. ¿Deseas iniciar sesión ahora?')
+    if (deseaLogin) {
+      router.push('/login')
+    }
     return
   }
+
+  let usuarioParaEnviar = usuarioNombre.value.trim()
 
   if (!nuevoComentario.value.trim()) {
     errorMensaje.value = 'Completa tu comentario antes de enviar.'
@@ -103,6 +107,11 @@ const enviarResena = async () => {
         console.warn('No se pudo recuperar nombre de usuario antes de enviar la reseña:', err)
       }
     }
+
+    if (!usuarioNombre.value.trim()) {
+      throw new Error('No se pudo recuperar tu nombre de usuario. Vuelve a iniciar sesión.')
+    }
+    usuarioParaEnviar = usuarioNombre.value.trim()
     const res = await fetch('http://localhost:3000/api/resenas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -121,9 +130,6 @@ const enviarResena = async () => {
 
     const nuevaResena = responseData.data ?? responseData
     reviews.value.unshift(nuevaResena)
-    if (!estaLogueado.value) {
-      nuevoUsuario.value = ''
-    }
     nuevoComentario.value = ''
     nuevoRating.value = 5
   } catch (err) {
@@ -135,12 +141,19 @@ const enviarResena = async () => {
 }
 
 const eliminarResena = async (id) => {
+  if (!estaLogueado.value) {
+    errorMensaje.value = 'Debes iniciar sesión para eliminar reseñas.'
+    return
+  }
+
   if (!confirm('¿Seguro que deseas eliminar esta reseña?')) return
 
   errorMensaje.value = ''
   try {
     const res = await fetch(`http://localhost:3000/api/resenas/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usuario_nombre: usuarioNombre.value })
     })
 
     const responseData = await res.json()
@@ -158,9 +171,6 @@ const eliminarResena = async (id) => {
 const handleSessionUpdated = () => {
   usuarioNombre.value = localStorage.getItem('usuarioNombre') || ''
   estaLogueado.value = Boolean(localStorage.getItem('usuarioId'))
-  if (estaLogueado.value) {
-    nuevoUsuario.value = usuarioNombre.value
-  }
 }
 
 onMounted(async () => {
@@ -223,6 +233,7 @@ const volver = () => router.push('/')
                   <div class="review-meta-right">
                     <span class="rating">★ {{ review.rating }}</span>
                     <button
+                      v-if="puedeEliminar(review)"
                       type="button"
                       class="btn-delete"
                       @click="eliminarResena(review.id)"
@@ -244,9 +255,8 @@ const volver = () => router.push('/')
           <form @submit.prevent="enviarResena" class="review-form">
             <h4>Deja tu reseña</h4>
 
-            <div v-if="!estaLogueado" class="review-group">
-              <label>Nombre</label>
-              <input v-model="nuevoUsuario" type="text" placeholder="Tu nombre o nickname" />
+            <div v-if="!estaLogueado" class="review-group alert">
+              <p>Solo puedes redactar reseñas si estás logueado. Si deseas comentar, inicia sesión primero.</p>
             </div>
 
             <div v-else class="review-group logged-in-note">

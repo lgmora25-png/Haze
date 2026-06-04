@@ -13,7 +13,13 @@ export class PagoRepository {
     if (telefono) query = query.eq('telefono', telefono)
 
     const { data, error } = await query.order('creado_at', { ascending: false })
-    if (error) throw new Error(`Error al buscar pagos: ${error.message}`)
+    if (error) {
+      const message = String(error.message || '').toLowerCase()
+      if (message.includes('permission denied')) {
+        throw new Error('Error al buscar pagos: permiso denegado. Configura SUPABASE_SERVICE_ROLE_KEY en el backend o habilita acceso a la tabla pagos.');
+      }
+      throw new Error(`Error al buscar pagos: ${error.message}`)
+    }
 
     return (data || []).map(d => new Pago(d))
   }

@@ -2,7 +2,7 @@
 
 import { supabase } from '../config/conexion.js'; 
 import { Usuario } from '../models/Usuario.js';
-// Eliminamos la importación de bcrypt
+// bcrypt eliminado — contraseñas se almacenan/gestionan en texto plano
 
 export class UsuarioRepository {
   
@@ -23,13 +23,16 @@ export class UsuarioRepository {
       throw new Error("El usuario ya existe");
     }
 
-    // Insertamos directamente la contraseña en texto plano
+    // Hasheamos la contraseña antes de almacenarla (bcrypt con salt rounds = 10)
+    // Almacenamos la contraseña tal cual (texto plano) — decisión del equipo
+    const hashed = usuarioInstancia.contrasena;
+
     const { data, error } = await supabase
       .from('usuarios')
       .insert([{
         nombre_usuario: usuarioInstancia.nombre_usuario,
         correo: usuarioInstancia.correo,
-        contrasena: usuarioInstancia.contrasena 
+        contrasena: hashed
       }])
       .select();
 
@@ -54,8 +57,8 @@ export class UsuarioRepository {
       throw new Error('El usuario no existe');
     }
 
-    // 2. Comparamos las contraseñas directamente (Texto plano contra texto plano)
-    if (usuario.contrasena !== contrasenaPlana) {
+    // 2. Comparamos la contraseña plana con la almacenada (texto plano)
+    if (contrasenaPlana !== usuario.contrasena) {
       throw new Error('Contraseña incorrecta');
     }
 
@@ -76,5 +79,19 @@ export class UsuarioRepository {
     }
 
     return new Usuario(data);
+  }
+
+  async verificarContrasena(id, contrasenaPlana) {
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select('contrasena')
+      .eq('id', id)
+      .single();
+
+    if (error || !data) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    return contrasenaPlana === data.contrasena;
   }
 }

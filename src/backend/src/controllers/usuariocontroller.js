@@ -89,4 +89,25 @@ export class UsuarioController {
       return res.status(500).json({ error: "Error al consultar el perfil." });
     }
   }
+
+  // === VERIFICAR CONTRASEÑA ===
+  static async verificarContrasena(req, res) {
+    try {
+      const { usuarioId, contrasena } = req.body;
+
+      if (!usuarioId || !contrasena) {
+        return res.status(400).json({ error: 'Faltan datos para verificar la contraseña.' });
+      }
+
+      const esValida = await usuarioRepository.verificarContrasena(usuarioId, contrasena);
+
+      if (!esValida) {
+        return res.status(401).json({ error: 'Contraseña incorrecta' });
+      }
+
+      return res.status(200).json({ mensaje: 'Contraseña válida', valido: true });
+    } catch (error) {
+      return res.status(500).json({ error: error.message || 'Error al verificar la contraseña.' });
+    }
+  }
 }
