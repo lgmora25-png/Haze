@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 
-// 1. Cargar las variables de entorno del archivo .env de forma segura
+
 dotenv.config();
 
 const supabaseUrl = process.env.SUPABASE_URL;
