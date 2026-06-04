@@ -1,17 +1,17 @@
-// src/router/index.js
+// src/router/Index.js
 import { createRouter, createWebHistory } from 'vue-router'
 
 // Importamos tus componentes (ajusta la ruta de carpetas si es necesario)
-import SearchGame from '../juegos/search-game.vue'
-import AddGame from '../juegos/add-game.vue'
-import InfoGame from '../juegos/info-game.vue'
-import Register from '../Registro/register.vue'
-import Profile from '../Registro/profile.vue'
-import Login from '../Registro/login.vue'
-import AdminMenu from '../usuario/admin-menu.vue'
+import SearchGame from '../juegos/Search-game.vue'
+import AddGame from '../juegos/Add-game.vue'
+import InfoGame from '../juegos/Info-game.vue'
+import Register from '../Registro/Register.vue'
+import Profile from '../Registro/Profile.vue'
+import Login from '../Registro/Login.vue'
+import AdminMenu from '../usuario/Admin-menu.vue'
 import ManagePayments from '../pagos/ManagePayments.vue'
-import ProcessPayment from '../pagos/process-payment.vue'
-import ConsultPayment from '../pagos/consult-payment.vue'
+import ProcessPayment from '../pagos/Process-payment.vue'
+import ConsultPayment from '../pagos/Consult-payment.vue'
 
 const routes = [
   {

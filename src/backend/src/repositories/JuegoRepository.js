@@ -44,26 +44,20 @@ export class JuegoRepository {
     }
 
     // 2) Validar que la misma imagen/base64 no haya sido usada
-    // Nota: las cadenas Base64 de imagen pueden ser muy grandes y causar un GET con URI demasiado largo.
-    const imagenUrlSegment = String(imagenUrl || '');
-    if (imagenUrlSegment.length <= 1500) {
-      try {
-        const { data: imagenExistente, error: imagenError } = await supabase
-          .from('juegos')
-          .select('id')
-          .eq('imagen_url', imagenUrl)
-          .limit(1);
+    try {
+      const { data: imagenExistente, error: imagenError } = await supabase
+        .from('juegos')
+        .select('id')
+        .eq('imagen_url', imagenUrl)
+        .limit(1);
 
-        if (imagenError) throw imagenError;
-        if (imagenExistente && imagenExistente.length > 0) {
-          throw new Error('Duplicado: La imagen ya está en uso por otro juego.');
-        }
-      } catch (err) {
-        if (String(err.message || err).toLowerCase().includes('duplic')) throw err;
-        throw new Error(`Error al validar imagen existente: ${err.message || err}`);
+      if (imagenError) throw imagenError;
+      if (imagenExistente && imagenExistente.length > 0) {
+        throw new Error('Duplicado: La imagen ya está en uso por otro juego.');
       }
-    } else {
-      console.warn('Se omite la validación de imagen duplicada porque la URL/Base64 es muy larga.');
+    } catch (err) {
+      if (String(err.message || err).toLowerCase().includes('duplic')) throw err;
+      throw new Error(`Error al validar imagen existente: ${err.message || err}`);
     }
 
     const { data, error } = await supabase
@@ -84,7 +78,7 @@ export class JuegoRepository {
     return new Juego(data[0]);
   }
   async obtenerPorId(id) {
-    const candidateKeys = ['id', 'juego_id'];
+    const candidateKeys = ['juego_id', 'id'];
 
     for (const key of candidateKeys) {
       const { data, error } = await supabase
