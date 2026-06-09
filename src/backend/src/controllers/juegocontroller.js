@@ -38,7 +38,7 @@ export class JuegoController {
       });
 
     } catch (error) {
-      const errorText = `[$(new Date().toISOString())] Error en JuegoController.crear: ${error.stack || error}\n`;
+      const errorText = `[${new Date().toISOString()}] Error en JuegoController.crear: ${error.stack || error}\n`;
       console.error(errorText);
       try {
         fs.appendFileSync(new URL('../../error.log', import.meta.url), errorText);

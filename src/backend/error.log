@@ -32,3 +32,84 @@
     at JuegoRepository.crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/repositories/JuegoRepository.js:60:13)
     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
     at async crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/controllers/juegocontroller.js:33:27)
+[$(new Date().toISOString())] Error en JuegoController.crear: Error: Error al validar imagen existente: <html>
+<head><title>414 Request-URI Too Large</title></head>
+<body>
+<center><h1>414 Request-URI Too Large</h1></center>
+<hr><center>cloudflare</center>
+</body>
+</html>
+
+    at JuegoRepository.crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/repositories/JuegoRepository.js:60:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/controllers/Juegocontroller.js:33:27)
+[$(new Date().toISOString())] Error en JuegoController.crear: Error: Error al validar imagen existente: Bad Request
+    at JuegoRepository.crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/repositories/JuegoRepository.js:60:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/controllers/Juegocontroller.js:33:27)
+[$(new Date().toISOString())] Error en JuegoController.crear: Error: Error al validar imagen existente: <html>
+<head><title>414 Request-URI Too Large</title></head>
+<body>
+<center><h1>414 Request-URI Too Large</h1></center>
+<hr><center>cloudflare</center>
+</body>
+</html>
+
+    at JuegoRepository.crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/repositories/JuegoRepository.js:60:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/controllers/Juegocontroller.js:33:27)
+[$(new Date().toISOString())] Error en JuegoController.crear: Error: Error al validar imagen existente: <html>
+<head><title>414 Request-URI Too Large</title></head>
+<body>
+<center><h1>414 Request-URI Too Large</h1></center>
+<hr><center>cloudflare</center>
+</body>
+</html>
+
+    at JuegoRepository.crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/repositories/JuegoRepository.js:60:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/controllers/Juegocontroller.js:33:27)
+[$(new Date().toISOString())] Error en JuegoController.crear: Error: Error al validar imagen existente: <html>
+<head><title>414 Request-URI Too Large</title></head>
+<body>
+<center><h1>414 Request-URI Too Large</h1></center>
+<hr><center>cloudflare</center>
+</body>
+</html>
+
+    at JuegoRepository.crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/repositories/JuegoRepository.js:60:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/controllers/Juegocontroller.js:33:27)
+[$(new Date().toISOString())] Error en JuegoController.crear: Error: Error al validar imagen existente: <html>
+<head><title>414 Request-URI Too Large</title></head>
+<body>
+<center><h1>414 Request-URI Too Large</h1></center>
+<hr><center>cloudflare</center>
+</body>
+</html>
+
+    at JuegoRepository.crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/repositories/JuegoRepository.js:60:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/controllers/Juegocontroller.js:33:27)
+[$(new Date().toISOString())] Error en JuegoController.crear: Error: Error al validar imagen existente: <html>
+<head><title>414 Request-URI Too Large</title></head>
+<body>
+<center><h1>414 Request-URI Too Large</h1></center>
+<hr><center>cloudflare</center>
+</body>
+</html>
+
+    at JuegoRepository.crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/repositories/JuegoRepository.js:60:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/controllers/Juegocontroller.js:33:27)
+[$(new Date().toISOString())] Error en JuegoController.crear: Error: Error al validar imagen existente: <html>
+<head><title>414 Request-URI Too Large</title></head>
+<body>
+<center><h1>414 Request-URI Too Large</h1></center>
+<hr><center>cloudflare</center>
+</body>
+</html>
+
+    at JuegoRepository.crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/repositories/JuegoRepository.js:60:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async crear (file:///C:/Users/maria/Documents/GitHub/Haze/src/backend/src/controllers/Juegocontroller.js:33:27)

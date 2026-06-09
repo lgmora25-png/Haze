@@ -15,16 +15,26 @@ const juego = ref({
 })
 
 // Función para procesar la imagen local de la PC
+const MAX_IMAGEN_MB = 2 // Base64 crece ~33%
 const procesarImagen = (event) => {
   const archivo = event.target.files[0]
-  if (archivo) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      juego.value.imagen_url = e.target.result
-    }
-    reader.readAsDataURL(archivo)
+  if (!archivo) return
+
+  const maxBytes = MAX_IMAGEN_MB * 1024 * 1024
+  if (archivo.size > maxBytes) {
+    alert(`❌ La imagen es demasiado grande. Máximo permitido: ${MAX_IMAGEN_MB}MB.`)
+    event.target.value = ''
+    juego.value.imagen_url = ''
+    return
   }
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    juego.value.imagen_url = e.target.result
+  }
+  reader.readAsDataURL(archivo)
 }
+
 
 const publicarJuego = async () => {
   if (!juego.value.titulo || !juego.value.imagen_url) {
@@ -47,21 +57,9 @@ const publicarJuego = async () => {
         j => j.titulo.trim().toLowerCase() === juego.value.titulo.trim().toLowerCase()
       )
 
-      // 2. Validar si la cadena de la imagen (Base64) ya existe
-      const imagenExiste = juegosExistentes.some(
-        j => j.imagen_url === juego.value.imagen_url
-      )
-
       // Si el título se repite, detenemos el proceso
       if (tituloExiste) {
         alert("❌ Error: Ya existe un juego publicado con este título en HAZE.")
-        cargando.value = false
-        return
-      }
-
-      // Si la imagen se repite, detenemos el proceso
-      if (imagenExiste) {
-        alert("❌ Error: Esta imagen ya está siendo utilizada por otro juego en la plataforma.")
         cargando.value = false
         return
       }
@@ -81,7 +79,7 @@ const publicarJuego = async () => {
       let errorMessage = 'No se pudo publicar'
       try {
         const errorData = await res.json()
-        errorMessage = errorData.error || errorMessage
+        errorMessage = errorData.error || errorData.details || errorMessage
       } catch (jsonError) {
         const text = await res.text()
         if (text) errorMessage = text

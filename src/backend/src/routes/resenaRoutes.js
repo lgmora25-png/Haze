@@ -1,6 +1,6 @@
 import express from 'express'
-// Importación exacta apuntando a tu archivo en minúsculas
-import { resenaController } from '../controllers/resenacontroller.js'
+// Importación exacta apuntando a tu archivo con mayúscula inicial
+import { resenaController } from '../controllers/Resenacontroller.js'
 
 const router = express.Router()
 

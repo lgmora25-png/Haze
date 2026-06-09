@@ -75,7 +75,7 @@ const irADetalle = (juego) => {
     <div v-if="esDueno" class="admin-container">
       <button @click="toggleMenu" class="gear-btn">⚙️ Configuración</button>
       <div v-if="menuAbierto" class="admin-dropdown">
-        <button @click="irASubir" class="dropdown-item">➕ Add Game</button>
+        <button @click="irASubir" class="dropdown-item">➕ Subir juego</button>
         <button @click="gestionarPago" class="dropdown-item">💳 Gestionar Pago</button>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { supabase } from '../config/conexion.js'
+import { supabase } from '../config/Conexion.js'
 import { Pago } from '../models/Pago.js'
 
 export class PagoRepository {

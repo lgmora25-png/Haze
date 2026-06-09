@@ -1,21 +1,21 @@
 import express from 'express'
 import cors from 'cors'
-import juegoRoutes from './routes/juegoRoutes.js'
-import usuarioRoutes from './routes/usuarioRoutes.js'
-import resenaRoutes from './routes/resenaRoutes.js'
-import pagoRoutes from './routes/pagoRoutes.js'
+import juegoRoutes from './routes/JuegoRoutes.js'
+import usuarioRoutes from './routes/UsuarioRoutes.js'
+import resenaRoutes from './routes/ResenaRoutes.js'
+import pagoRoutes from './routes/PagoRoutes.js'
 
 const app = express()
 
 
 app.use(cors({
   origin: '*',
-  methods: ['GEqT', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json({ limit: '10mb' }))
-app.use(express.urlencoded({ extended: true, limit: '10mb' }))
+app.use(express.json({ limit: '25mb' }))
+app.use(express.urlencoded({ extended: true, limit: '25mb' }))
 app.use('/api/juegos', juegoRoutes)
 app.use('/api/usuarios', usuarioRoutes)
 app.use('/api/resenas', resenaRoutes)

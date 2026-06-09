@@ -1,6 +1,6 @@
 // src/repositories/UsuarioRepository.js
 
-import { supabase } from '../config/conexion.js'; 
+import { supabase } from '../config/Conexion.js'; 
 import { Usuario } from '../models/Usuario.js';
 // bcrypt eliminado — contraseñas se almacenan/gestionan en texto plano
 

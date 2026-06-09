@@ -1,7 +1,9 @@
 // Modelo: Clase Juego (POO purista)
 export class Juego {
-  constructor({ id = null, titulo, precio = 0, generos = null, descripcion = null, imagen_url }) {
-    this.id = id;                     // Identificador único de la base de datos
+  constructor({ id = null, juego_id = null, titulo, precio = 0, generos = null, descripcion = null, imagen_url }) {
+    const resolvedId = id ?? juego_id;
+    this.id = resolvedId;             // Identificador único de la base de datos
+    this.juego_id = resolvedId;       // Alias usado en algunas consultas/props del frontend
     this.titulo = titulo;             // String: Nombre del videojuego
     this.precio = Number(precio);     // Number: Aseguramos que sea un número para operaciones matemáticas
     this.generos = generos;           // String: Categorías o géneros del juego

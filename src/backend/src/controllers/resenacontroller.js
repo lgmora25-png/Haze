@@ -71,9 +71,9 @@ export const resenaController = {
   eliminarResena: async (req, res) => {
     try {
       const { id } = req.params;
-      const { usuario_nombre } = req.body;
+      const { usuario_nombre, rol } = req.body;
 
-      if (!usuario_nombre) {
+      if (!usuario_nombre && rol !== 'dueno') {
         return res.status(401).json({ error: 'Debe iniciar sesión para eliminar reseñas.' });
       }
 
@@ -82,7 +82,10 @@ export const resenaController = {
         return res.status(404).json({ error: 'Reseña no encontrada.' });
       }
 
-      if (resenaExistente.usuario_nombre !== usuario_nombre) {
+      const esAutor = usuario_nombre && resenaExistente.usuario_nombre === usuario_nombre;
+      const esDueno = rol === 'dueno';
+
+      if (!esAutor && !esDueno) {
         return res.status(403).json({ error: 'Solo puedes eliminar tus propias reseñas.' });
       }
 

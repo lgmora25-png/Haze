@@ -1,4 +1,4 @@
-import { supabase } from '../config/conexion.js';
+import { supabase } from '../config/Conexion.js';
 import { Juego } from '../models/Juego.js';
 
 export class JuegoRepository {
@@ -44,21 +44,10 @@ export class JuegoRepository {
     }
 
     // 2) Validar que la misma imagen/base64 no haya sido usada
-    try {
-      const { data: imagenExistente, error: imagenError } = await supabase
-        .from('juegos')
-        .select('id')
-        .eq('imagen_url', imagenUrl)
-        .limit(1);
-
-      if (imagenError) throw imagenError;
-      if (imagenExistente && imagenExistente.length > 0) {
-        throw new Error('Duplicado: La imagen ya está en uso por otro juego.');
-      }
-    } catch (err) {
-      if (String(err.message || err).toLowerCase().includes('duplic')) throw err;
-      throw new Error(`Error al validar imagen existente: ${err.message || err}`);
-    }
+    // Esta comprobación se elimina porque, con imágenes Base64 grandes,
+    // Supabase puede generar URIs extensas y provocar errores 414.
+    // El frontend ya hace una verificación general de duplicados por título e imagen,
+    // y el backend continúa validando el título para evitar duplicados críticos.
 
     const { data, error } = await supabase
       .from('juegos')
@@ -78,31 +67,16 @@ export class JuegoRepository {
     return new Juego(data[0]);
   }
   async obtenerPorId(id) {
-    const candidateKeys = ['juego_id', 'id'];
+    const { data, error } = await supabase
+      .from('juegos')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-    for (const key of candidateKeys) {
-      const { data, error } = await supabase
-        .from('juegos')
-        .select('*')
-        .eq(key, id)
-        .single();
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          continue; // Intentar siguiente nombre de columna
-        }
-
-        const message = String(error.message || '').toLowerCase();
-        if (message.includes('column') || message.includes('unknown')) {
-          continue; // Puede que este nombre de columna no exista en la tabla
-        }
-
-        throw new Error(`Error al obtener juego por ID: ${error.message}`);
-      }
-
-      return new Juego(data);
+    if (error) {
+      throw new Error(`Error al obtener juego por ID: ${error.message}`);
     }
 
-    return null;
+    return data ? new Juego(data) : null;
   }
 }

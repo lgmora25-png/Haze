@@ -2,19 +2,60 @@
 import { ref, computed, watch } from 'vue'
 
 const props = defineProps({
-  juego: Object
+  id: {
+    type: [String, Number],
+    required: false
+  },
+  juego: {
+    type: Object,
+    required: false
+  }
 })
 const emit = defineEmits(['volver'])
 
+const juego = ref(props.juego ?? null)
 const reviews = ref([])
 const nuevoComentario = ref('')
 const nuevoRating = ref(5)
-const nuevoUsuario = ref('')
 const cargandoResenas = ref(false)
 const cargandoEnvio = ref(false)
 const errorMensaje = ref('')
+const cargandoJuego = ref(false)
+// Información de sesión (si existe)
+const usuarioNombreActual = ref(localStorage.getItem('usuarioNombre') || '')
+const rolUsuarioActual = ref(localStorage.getItem('rol') || '')
+// Prefill del campo nombre: si el usuario está logueado usamos su nombre de sesión
+const nuevoUsuario = ref(usuarioNombreActual.value || '')
 
-const juegoId = computed(() => props.juego?.juego_id ?? props.juego?.id ?? '')
+const juegoId = computed(() => {
+  return props.id ?? props.juego?.juego_id ?? props.juego?.id ?? juego.value?.juego_id ?? juego.value?.id ?? ''
+})
+
+const loadGame = async () => {
+  if (!juegoId.value) {
+    errorMensaje.value = 'No se encontró el identificador del juego.'
+    return
+  }
+
+  if (props.juego) {
+    juego.value = props.juego
+    return
+  }
+
+  cargandoJuego.value = true
+  errorMensaje.value = ''
+
+  try {
+    const res = await fetch(`http://localhost:3000/api/juegos/${juegoId.value}`)
+    if (!res.ok) throw new Error('No se pudo cargar la información del juego')
+    juego.value = await res.json()
+  } catch (err) {
+    console.error(err)
+    errorMensaje.value = 'Error al cargar la información del juego.'
+  } finally {
+    cargandoJuego.value = false
+  }
+}
 
 const loadReviews = async () => {
   if (!juegoId.value) return
@@ -33,11 +74,19 @@ const loadReviews = async () => {
   }
 }
 
+const cargarDetalle = async () => {
+  await loadGame()
+  await loadReviews()
+}
+
 const enviarResena = async () => {
   errorMensaje.value = ''
 
-  if (!nuevoUsuario.value.trim() || !nuevoComentario.value.trim()) {
-    errorMensaje.value = 'Completa tu nombre y el comentario antes de enviar.'
+  // Si el usuario está logueado usamos su nombre de sesión
+  const usuarioParaEnviar = usuarioNombreActual.value || nuevoUsuario.value.trim()
+
+  if (!usuarioParaEnviar || !nuevoComentario.value.trim()) {
+    errorMensaje.value = 'Debes proporcionar un comentario. El nombre se toma automáticamente si estás logueado.'
     return
   }
 
@@ -54,7 +103,7 @@ const enviarResena = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         juego_id: juegoId.value,
-        usuario_nombre: nuevoUsuario.value.trim(),
+        usuario_nombre: usuarioParaEnviar,
         rating: Number(nuevoRating.value),
         comentario: nuevoComentario.value.trim()
       })
@@ -67,7 +116,8 @@ const enviarResena = async () => {
 
     const nuevaResena = responseData.data ?? responseData
     reviews.value.unshift(nuevaResena)
-    nuevoUsuario.value = ''
+    // Si el usuario no está logueado, limpiamos el campo nombre; si sí, lo dejamos
+    if (!usuarioNombreActual.value) nuevoUsuario.value = ''
     nuevoComentario.value = ''
     nuevoRating.value = 5
   } catch (err) {
@@ -84,7 +134,12 @@ const eliminarResena = async (id) => {
   errorMensaje.value = ''
   try {
     const res = await fetch(`http://localhost:3000/api/resenas/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        usuario_nombre: usuarioNombreActual.value,
+        rol: rolUsuarioActual.value
+      })
     })
 
     const responseData = await res.json()
@@ -100,9 +155,9 @@ const eliminarResena = async (id) => {
 }
 
 watch(
-  () => props.juego,
-  async (nuevoJuego) => {
-    if (nuevoJuego) await loadReviews()
+  () => [props.id, props.juego],
+  async () => {
+    await cargarDetalle()
   },
   { immediate: true }
 )
@@ -142,6 +197,7 @@ watch(
                   <div class="review-meta-right">
                     <span class="rating">★ {{ review.rating }}</span>
                     <button
+                      v-if="review.usuario_nombre === usuarioNombreActual || rolUsuarioActual === 'dueno'"
                       type="button"
                       class="btn-delete"
                       @click="eliminarResena(review.id)"
@@ -165,7 +221,8 @@ watch(
 
             <div class="review-group">
               <label>Nombre</label>
-              <input v-model="nuevoUsuario" type="text" placeholder="Tu nombre o nickname" />
+              <input v-model="nuevoUsuario" :readonly="!!usuarioNombreActual" type="text" :placeholder="usuarioNombreActual || 'Tu nombre o nickname'" />
+              <small v-if="usuarioNombreActual" style="display:block;margin-top:6px;color:#9b9b9b">Usando tu nombre de sesión: {{ usuarioNombreActual }}</small>
             </div>
 
             <div class="review-row">
@@ -207,6 +264,7 @@ watch(
       </aside>
     </div>
   </div>
+  <div v-else-if="errorMensaje" class="error-message">{{ errorMensaje }}</div>
   <div v-else class="loader">Cargando la experiencia...</div>
 </template>
 

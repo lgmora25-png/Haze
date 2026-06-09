@@ -1,7 +1,7 @@
 // src/routes/usuarioRoutes.js
 
 import { Router } from 'express';
-import { UsuarioController } from '../controllers/usuarioController.js'; // Asegúrate de que el nombre del archivo coincida exactamente
+import { UsuarioController } from '../controllers/Usuariocontroller.js'; // Asegúrate de que el nombre del archivo coincida exactamente
 
 const router = Router();
 
