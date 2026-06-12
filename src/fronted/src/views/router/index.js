@@ -8,8 +8,8 @@ import InfoGame from '../juegos/Info-game.vue'
 import Register from '../Registro/Register.vue'
 import Profile from '../Registro/Profile.vue'
 import Login from '../Registro/Login.vue'
-import ProcessPayment from '../pagos/Process-payment.vue'
-import ConsultPayment from '../pagos/Consult-payment.vue'
+import ProcessPayment from '../Registro/Process-payment.vue'
+import ConsultPayment from '../Registro/Consult-payment.vue'
 
 const routes = [
   {
