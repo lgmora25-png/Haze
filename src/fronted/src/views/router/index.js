@@ -8,8 +8,6 @@ import InfoGame from '../juegos/Info-game.vue'
 import Register from '../Registro/Register.vue'
 import Profile from '../Registro/Profile.vue'
 import Login from '../Registro/Login.vue'
-import AdminMenu from '../usuario/Admin-menu.vue'
-import ManagePayments from '../pagos/ManagePayments.vue'
 import ProcessPayment from '../pagos/Process-payment.vue'
 import ConsultPayment from '../pagos/Consult-payment.vue'
 
@@ -23,12 +21,6 @@ const routes = [
     path: '/subir',
     name: 'subir-juego',
     component: AddGame,
-    meta: { requiresOwner: true }
-  },
-  {
-    path: '/admin',
-    name: 'admin-menu',
-    component: AdminMenu,
     meta: { requiresOwner: true }
   },
   {
@@ -54,12 +46,6 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: Login
-  },
-  {
-    path: '/pagos/manage',
-    name: 'gestion-pagos',
-    component: ManagePayments,
-    meta: { requiresOwner: true }
   },
   {
     path: '/pagos/process',

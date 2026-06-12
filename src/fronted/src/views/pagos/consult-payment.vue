@@ -65,7 +65,7 @@ const resultados = ref([])
 const detalle = ref(null)
 const error = ref('')
 
-const cancelar = () => router.push('/pagos/manage')
+const cancelar = () => router.push('/pagos/consult')
 
 const buscar = async () => {
   error.value = ''

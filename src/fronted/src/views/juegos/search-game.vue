@@ -9,7 +9,6 @@ const cargando = ref(true)
 const mensajeError = ref('')
 const textoBusqueda = ref('')
 const esDueno = ref(false)
-const menuAbierto = ref(false)
 
 onMounted(async () => {
   const rolUsuario = localStorage.getItem('rol')
@@ -50,17 +49,9 @@ const juegosFiltrados = computed(() => {
   )
 })
 
-const toggleMenu = () => {
-  menuAbierto.value = !menuAbierto.value
-}
-
-const gestionarPago = () => {
-  router.push('/pagos/manage')
-}
-
-const irASubir = () => {
-  router.push('/subir')
-}
+// Navegar a procesamiento y consulta de pagos directamente
+const irAProcess = () => { router.push('/pagos/process') }
+const irAConsult = () => { router.push('/pagos/consult') }
 
 // Navegamos a la ruta de detalle usando el ID del juego
 const irADetalle = (juego) => {
@@ -72,13 +63,7 @@ const irADetalle = (juego) => {
 
 <template>
   <div class="catalog-page">
-    <div v-if="esDueno" class="admin-container">
-      <button @click="toggleMenu" class="gear-btn">⚙️ Configuración</button>
-      <div v-if="menuAbierto" class="admin-dropdown">
-        <button @click="irASubir" class="dropdown-item">➕ Subir juego</button>
-        <button @click="gestionarPago" class="dropdown-item">💳 Gestionar Pago</button>
-      </div>
-    </div>
+    <!-- Configuración removida: opción redundante con '➕ Subir Juego' en el header -->
 
     <header class="catalog-header">
       <div class="header-left">
@@ -146,59 +131,8 @@ const irADetalle = (juego) => {
 .error-message { text-align: center; color: #da5b5b; margin-top: 50px; font-weight: bold; }
 .empty-state { text-align: center; color: #888; margin-top: 50px; }
 
-.admin-container {
-  position: fixed;
-  top: 24px;
-  right: 24px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
+/* Configuración del menú admin eliminada */
 
-.gear-btn {
-  background: #2b2b2b;
-  color: #fff;
-  border: 1px solid #444;
-  padding: 10px 14px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 700;
-  transition: all 0.25s ease;
-}
-
-.gear-btn:hover {
-  border-color: #da5b5b;
-  box-shadow: 0 0 14px rgba(218, 91, 91, 0.3);
-}
-
-.admin-dropdown {
-  margin-top: 10px;
-  min-width: 180px;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 12px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-}
-
-.dropdown-item {
-  background: transparent;
-  color: #ccc;
-  border: none;
-  padding: 10px 12px;
-  text-align: left;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: background 0.2s ease;
-}
-
-.dropdown-item:hover {
-  background: #da5b5b;
-  color: #fff;
-}
+.payment-btn { background: #2b2b2b; color: #fff; padding: 8px 12px; border-radius: 8px; border: 1px solid #444; font-weight:700; cursor: pointer; }
+.payment-btn:hover { border-color: #da5b5b; }
 </style>

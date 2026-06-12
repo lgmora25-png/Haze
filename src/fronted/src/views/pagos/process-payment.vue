@@ -55,7 +55,7 @@ const mensaje = ref('')
 const cancelar = () => {
   mensaje.value = ''
   error.value = ''
-  router.push('/pagos/manage')
+  router.push('/pagos/consult')
 }
 
 const confirmar = async () => {
@@ -84,7 +84,7 @@ const confirmar = async () => {
     if (!res.ok) throw new Error(data.mensaje || data.error || 'Error procesando pago')
 
     mensaje.value = data.mensaje || 'Pago procesado con éxito.'
-    setTimeout(() => router.push('/pagos/manage'), 1200)
+    setTimeout(() => router.push('/pagos/consult'), 1200)
   } catch (err) {
     error.value = err.message || 'Error inesperado.'
   }

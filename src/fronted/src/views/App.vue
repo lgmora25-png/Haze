@@ -8,25 +8,13 @@
 
       <div class="nav-links">
         <router-link to="/" class="nav-btn" :class="{ active: route.path === '/' }">Explorar</router-link>
-
-        <!-- Botón visible solo para dueños -->
-        <router-link
-          v-if="rol === 'dueno'"
-          to="/pagos/manage"
-          class="nav-btn"
-          :class="{ active: route.path.startsWith('/pagos') }"
-        >
-          Pagos
-        </router-link>
-
-        <router-link
-          v-if="rol === 'dueno'"
-          to="/admin"
-          class="nav-btn"
-          :class="{ active: route.path === '/admin' }"
-        >
-          Admin
-        </router-link>
+        <div v-if="rol === 'dueno'" class="nav-dropdown">
+          <button class="nav-btn nav-toggle" @click="togglePagos">Pagos</button>
+          <div v-if="pagosAbiertos" class="nav-dropdown-panel">
+            <button class="nav-dropdown-item" @click="irAProcess">💳 Procesar Pago</button>
+            <button class="nav-dropdown-item" @click="irAConsult">🔎 Consultar Pagos</button>
+          </div>
+        </div>
 
         <router-link
           v-if="!estaLogueado"
@@ -85,6 +73,21 @@ const usuarioId = ref(localStorage.getItem('usuarioId') || '');
 const usuarioNombre = ref(localStorage.getItem('usuarioNombre') || '');
 const rol = ref(localStorage.getItem('rol') || '');
 const estaLogueado = computed(() => Boolean(usuarioId.value));
+const pagosAbiertos = ref(false);
+
+const togglePagos = () => {
+  pagosAbiertos.value = !pagosAbiertos.value;
+};
+
+const irAProcess = () => {
+  pagosAbiertos.value = false;
+  router.push('/pagos/process');
+};
+
+const irAConsult = () => {
+  pagosAbiertos.value = false;
+  router.push('/pagos/consult');
+};
 
 const actualizarSesion = async () => {
   usuarioId.value = localStorage.getItem('usuarioId') || '';
@@ -133,10 +136,13 @@ const cerrarSesion = () => {
   usuarioId.value = '';
   usuarioNombre.value = '';
   rol.value = '';
+  pagosAbiertos.value = false;
+  window.dispatchEvent(new CustomEvent('session-updated'));
   router.push('/');
 };
 
 const irAPantalla = (path) => {
+  pagosAbiertos.value = false;
   router.push(path);
 };
 </script>
@@ -179,6 +185,42 @@ body {
   display: flex;
   gap: 15px;
   align-items: center;
+  position: relative;
+}
+
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 16px 36px rgba(0,0,0,0.25);
+  z-index: 100;
+}
+
+.nav-dropdown-item {
+  background: #2b2b2b;
+  color: #fff;
+  border: 1px solid #444;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-dropdown-item:hover {
+  border-color: #da5b5b;
 }
 
 /* Transformamos los antiguos enlaces en botones limpios */
