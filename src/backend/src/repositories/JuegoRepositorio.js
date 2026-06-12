@@ -1,7 +1,7 @@
 import { supabase } from '../config/Conexion.js';
 import { Juego } from '../models/Juego.js';
 
-export class JuegoRepository {
+export class JuegoRepositorio {
   // 1. Obtener todos los juegos (para el catálogo)
   async obtenerTodos() {
     const { data, error } = await supabase

@@ -1,7 +1,7 @@
 import { supabase } from '../config/Conexion.js'
 import { Pago } from '../models/Pago.js'
 
-export class PagoRepository {
+export class PagoRepositorio {
   constructor() {}
 
   // Buscar pagos por filtros de cliente (nombre, documento, telefono)

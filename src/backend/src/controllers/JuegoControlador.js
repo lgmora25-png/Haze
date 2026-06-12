@@ -1,12 +1,12 @@
-// src/backend/controllers/juegocontroller.js
+// src/backend/controllers/JuegoController.js
 
 import fs from 'fs';
 import { Juego } from '../models/Juego.js';
-import { JuegoRepository } from '../repositories/JuegoRepository.js';
+import { JuegoRepositorio } from '../repositories/JuegoRepositorio.js';
 
-const juegoRepository = new JuegoRepository();
+const juegoRepository = new JuegoRepositorio();
 
-export class JuegoController {
+export class JuegoControlador {
   
   // === HU1: BUSCAR/LISTAR JUEGOS ===
   static async obtenerTodos(req, res) {
@@ -38,7 +38,7 @@ export class JuegoController {
       });
 
     } catch (error) {
-      const errorText = `[${new Date().toISOString()}] Error en JuegoController.crear: ${error.stack || error}\n`;
+      const errorText = `[${new Date().toISOString()}] Error en JuegoControlador.crear: ${error.stack || error}\n`;
       console.error(errorText);
       try {
         fs.appendFileSync(new URL('../../error.log', import.meta.url), errorText);

@@ -1,8 +1,8 @@
-import { PagoRepository } from '../repositories/PagoRepository.js'
+import { PagoRepositorio } from '../repositories/PagoRepositorio.js'
 
-const pagoRepository = new PagoRepository()
+const pagoRepository = new PagoRepositorio()
 
-export const pagoController = {
+export const PagoControlador = {
   // POST /api/pagos/consultar  -> { nombre, documento, telefono }
   consultar: async (req, res) => {
     try {
@@ -15,7 +15,7 @@ export const pagoController = {
 
       res.json(resultados)
     } catch (error) {
-      console.error('Error en pagoController.consultar:', error)
+      console.error('Error en PagoControlador.consultar:', error)
       res.status(500).json({ error: error.message })
     }
   },
@@ -28,7 +28,7 @@ export const pagoController = {
       if (!pago) return res.status(404).json({ mensaje: 'Pago no encontrado' })
       res.json(pago)
     } catch (error) {
-      console.error('Error en pagoController.obtenerPorId:', error)
+      console.error('Error en PagoControlador.obtenerPorId:', error)
       res.status(500).json({ error: error.message })
     }
   },
@@ -59,7 +59,7 @@ export const pagoController = {
 
       res.json({ mensaje: 'Pago procesado con éxito.', data: pagoProcesado })
     } catch (error) {
-      console.error('Error en pagoController.procesarPago:', error)
+      console.error('Error en PagoControlador.procesarPago:', error)
       res.status(500).json({ error: error.message })
     }
   }

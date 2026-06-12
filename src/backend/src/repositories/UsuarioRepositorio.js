@@ -4,7 +4,7 @@ import { supabase } from '../config/Conexion.js';
 import { Usuario } from '../models/Usuario.js';
 // bcrypt eliminado — contraseñas se almacenan/gestionan en texto plano
 
-export class UsuarioRepository {
+export class UsuarioRepositorio {
   
   // === HISTORIA DE USUARIO 3: Registrar Perfil ===
   async crear(usuarioInstancia) {

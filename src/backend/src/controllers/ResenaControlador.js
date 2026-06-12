@@ -1,8 +1,8 @@
-import { ResenaRepository } from '../repositories/ResenaRepository.js'
+import { ResenaRepositorio } from '../repositories/ResenaRepositorio.js'
 
-const resenaRepository = new ResenaRepository()
+const resenaRepository = new ResenaRepositorio()
 
-export const resenaController = {
+export const ResenaControlador = {
   /**
    * Obtiene todas las reseñas vinculadas a un videojuego específico
    * Ruta: GET /api/resenas/juego/:juegoId
@@ -15,7 +15,7 @@ export const resenaController = {
       
       res.json(listaResenas);
     } catch (error) {
-      console.error('❌ Error en resenaController.obtenerResenas:', error);
+      console.error('❌ Error en ResenaControlador.obtenerResenas:', error);
       res.status(500).json({ error: 'Error interno al cargar las reseñas del juego.' });
     }
   },
@@ -59,7 +59,7 @@ export const resenaController = {
         data: nuevaResena 
       });
     } catch (error) {
-      console.error('❌ Error en resenaController.crearResena:', error);
+      console.error('❌ Error en ResenaControlador.crearResena:', error);
       res.status(500).json({ error: error.message });
     }
   },
@@ -97,7 +97,7 @@ export const resenaController = {
         mensaje: 'La reseña ha sido eliminada' 
       });
     } catch (error) {
-      console.error('❌ Error en resenaController.eliminarResena:', error);
+      console.error('❌ Error en ResenaControlador.eliminarResena:', error);
       res.status(500).json({ error: 'No se pudo procesar la eliminación de la reseña.' });
     }
   }

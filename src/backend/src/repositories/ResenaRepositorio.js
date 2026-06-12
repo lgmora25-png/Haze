@@ -1,7 +1,7 @@
 import { supabase } from '../config/Conexion.js'
 import { Resena } from '../models/Resena.js'
 
-export class ResenaRepository {
+export class ResenaRepositorio {
   async obtenerPorJuego(juegoId) {
     const { data, error } = await supabase
       .from('resenas')

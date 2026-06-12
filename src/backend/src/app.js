@@ -1,9 +1,9 @@
 import express from 'express'
 import cors from 'cors'
-import juegoRoutes from './routes/JuegoRoutes.js'
-import usuarioRoutes from './routes/UsuarioRoutes.js'
-import resenaRoutes from './routes/ResenaRoutes.js'
-import pagoRoutes from './routes/PagoRoutes.js'
+import juegoRoutes from './routes/JuegoRutas.js'
+import usuarioRoutes from './routes/UsuarioRutas.js'
+import resenaRoutes from './routes/ResenaRutas.js'
+import pagoRoutes from './routes/PagoRutas.js'
 
 const app = express()
 

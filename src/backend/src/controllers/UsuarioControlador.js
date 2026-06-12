@@ -1,11 +1,11 @@
-// src/controllers/usuarioController.js
+// src/controllers/UsuarioController.js
 
 import { Usuario } from '../models/Usuario.js';
-import { UsuarioRepository } from '../repositories/UsuarioRepository.js';
+import { UsuarioRepositorio } from '../repositories/UsuarioRepositorio.js';
 
-const usuarioRepository = new UsuarioRepository();
+const usuarioRepository = new UsuarioRepositorio();
 
-export class UsuarioController {
+export class UsuarioControlador {
   
   // === HU3: REGISTRAR PERFIL ===
   static async registrar(req, res) {
